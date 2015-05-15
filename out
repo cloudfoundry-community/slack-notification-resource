@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+exec 3>&1
+exec 1>&2
+
+# for jq
+PATH=/usr/local/bin:$PATH
+
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+
+cat > $payload <&0
+
+webhook_url=$(jq -r '.source.url' < $payload)
+
+body=$(jq -c '{"text":(.params.text // ""), "username": (.params.username // null), "icon_url": (.params.icon_url // null), "icon_emoji": (.params.icon_emoji // null), "channel": (.params.channel // null)}' < $payload)
+
+curl -X POST --data-urlencode "payload=$body" $webhook_url
+
+jq -n '{version:{ref:0}}' >&3
+
