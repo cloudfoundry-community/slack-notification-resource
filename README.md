@@ -4,7 +4,7 @@ Sends messages to [Slack](https://slack.com).
 
 ## Source Configuration
 
-* `url`: *Required.* The webhook URL as provided by Slack. Usually in the form: "https://hooks.slack.com/services/XXXX"
+* `url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
 
 ## Behavior
 
