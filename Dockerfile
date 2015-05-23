@@ -2,7 +2,9 @@ FROM ubuntu:14.04
 
 ADD http://stedolan.github.io/jq/download/linux64/jq /usr/local/bin/jq
 
-COPY out /opt/resource/out
+COPY check /opt/resource/check
+COPY in    /opt/resource/in
+COPY out   /opt/resource/out
 
 RUN chmod +x /usr/local/bin/jq /opt/resource/out && \
     apt-get update && \
