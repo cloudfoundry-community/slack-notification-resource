@@ -14,9 +14,19 @@ cat > $payload <&0
 
 webhook_url=$(jq -r '.source.url' < $payload)
 
-body=$(jq -c '{"text":(.params.text // ""), "username": (.params.username // null), "icon_url": (.params.icon_url // null), "icon_emoji": (.params.icon_emoji // null), "channel": (.params.channel // null)}' < $payload)
+text_file=$(jq -r '.params.text_file // ""' < $payload)
+if [[ -f ${text_file} ]]; then
+  text=$(cat ${text_file})
+  body=$(jq -c "{\"text\":\"${text}\", \"username\": (.params.username // null), \"icon_url\": (.params.icon_url // null), \"icon_emoji\": (.params.icon_emoji // null), \"channel\": (.params.channel // null)}" < $payload)
+else
+  body=$(jq -c '{"text":(.params.text // ""), "username": (.params.username // null), "icon_url": (.params.icon_url // null), "icon_emoji": (.params.icon_emoji // null), "channel": (.params.channel // null)}' < $payload)
+fi
 
-curl -X POST --data-urlencode "payload=$body" $webhook_url
+if [[ "$(jq -r '.params.debug // ""' < $payload)X" == "X" ]]; then
+  curl -X POST --data-urlencode "payload=$body" $webhook_url
+else
+  echo webhook_url $webhook_url
+  echo body $body
+fi
 
 jq -n '{version:{ref:0}}' >&3
-
