@@ -15,11 +15,16 @@ cat > $payload <&0
 webhook_url=$(jq -r '.source.url' < $payload)
 
 text_file=$(jq -r '.params.text_file // ""' < $payload)
-if [[ -f ${text_file} ]]; then
+if [[ "${text_file}X" != "X" ]]; then
   echo "Using dynamic text file: ${text_file}"
-  text=$(cat ${text_file})
-  echo "Text: ${text}"
-  body=$(jq -c "{\"text\":\"${text}\", \"username\": (.params.username // null), \"icon_url\": (.params.icon_url // null), \"icon_emoji\": (.params.icon_emoji // null), \"channel\": (.params.channel // null)}" < $payload)
+  if [[ -f ${text_file} ]]; then
+    text=$(cat ${text_file})
+    echo "Text: ${text}"
+    body=$(jq -c "{\"text\":\"${text}\", \"username\": (.params.username // null), \"icon_url\": (.params.icon_url // null), \"icon_emoji\": (.params.icon_emoji // null), \"channel\": (.params.channel // null)}" < $payload)
+  else
+    echo "Cannot find ${text_file}"
+    exit 1
+  fi
 else
   echo "Using static text"
   body=$(jq -c '{"text":(.params.text // ""), "username": (.params.username // null), "icon_url": (.params.icon_url // null), "icon_emoji": (.params.icon_emoji // null), "channel": (.params.channel // null)}' < $payload)
