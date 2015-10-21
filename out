@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 cd $1
 
@@ -33,7 +33,12 @@ else
 fi
 
 if [[ "$(jq -r '.params.debug // ""' < $payload)X" == "X" ]]; then
-  curl -v -X POST --data-urlencode "payload=$body" $webhook_url
+  if [[ "$(jq -r '.params.silent // ""' < $payload)X" == "X" ]]; then
+    curl -v -X POST --data-urlencode "payload=$body" $webhook_url
+  else
+    echo "Using silent output"
+    curl -s -X POST --data-urlencode "payload=$body" $webhook_url
+  fi
 else
   echo webhook_url $webhook_url
   echo body $body
