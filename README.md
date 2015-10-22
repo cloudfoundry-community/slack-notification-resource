@@ -32,6 +32,7 @@ Optional:
 -	`username`: *Optional.* Override name of the sender of the message.
 -	`icon_url`: *Optional.* Override icon by providing URL to the image.
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
+- `silent`: *Optional.* Do not print curl output (avoids leaking slack webhook URL)
 
 Examples
 --------
