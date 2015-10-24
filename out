@@ -2,7 +2,7 @@
 
 set -eu
 
-cd $1
+cd "${1}"
 
 exec 3>&1
 exec 1>&2
@@ -12,36 +12,77 @@ PATH=/usr/local/bin:$PATH
 
 payload=$(mktemp /tmp/resource-in.XXXXXX)
 
-cat > $payload <&0
+cat > "${payload}" <&0
 
-webhook_url=$(jq -r '.source.url' < $payload)
+webhook_url="$(jq -r '.source.url' < "${payload}")"
 
-text_file=$(jq -r '.params.text_file // ""' < $payload)
+set -x
+
+text_file="$(jq -r '.params.text_file // ""' < "${payload}")"
 if [[ "${text_file}X" != "X" ]]; then
   echo "Using dynamic text file: ${text_file}"
   if [[ -f ${text_file} ]]; then
-    text=$(cat ${text_file})
+    text="$(cat "${text_file}")"
     echo "Text: ${text}"
-    body=$(jq -c "{\"text\":\"${text}\", \"username\": (.params.username // null), \"icon_url\": (.params.icon_url // null), \"icon_emoji\": (.params.icon_emoji // null), \"channel\": (.params.channel // null)}" < $payload)
   else
     echo "Cannot find ${text_file}"
     exit 1
   fi
 else
   echo "Using static text"
-  body=$(jq -c '{"text":(.params.text // ""), "username": (.params.username // null), "icon_url": (.params.icon_url // null), "icon_emoji": (.params.icon_emoji // null), "channel": (.params.channel // null)}' < $payload)
+  text="$(jq '(.params.text // "")' < "${payload}")"
 fi
 
-if [[ "$(jq -r '.params.debug // ""' < $payload)X" == "X" ]]; then
-  if [[ "$(jq -r '.params.silent // ""' < $payload)X" == "X" ]]; then
-    curl -v -X POST --data-urlencode "payload=$body" $webhook_url
+username="$(jq '(.params.username // null)' < "${payload}")"
+icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
+icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
+channel="$(jq '(.params.channel // null)' < "${payload}")"
+
+if [ "${text}" != "" ]; then
+  text="$(eval "printf ${text}" | jq -R -s .)"
+fi
+
+if [ "${username}" != "null" ]; then
+  username="$(eval "printf ${username}" | jq -R -s .)"
+fi
+
+if [ "${icon_url}" != "null" ]; then
+  icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
+fi
+
+if [ "${icon_emoji}" != "null" ]; then
+  icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
+fi
+
+if [ "${channel}" != "null" ]; then
+  channel="$(eval "printf ${channel}" | jq -R -s .)"
+fi
+
+body="$(cat <<EOF
+{
+  "text": ${text},
+  "username": ${username},
+  "icon_url": ${icon_url},
+  "icon_emoji": ${icon_emoji},
+  "channel": ${channel}
+}
+EOF
+)"
+
+compact_body="$(echo "${body}" | jq -c '.')"
+
+set +x
+
+if [[ "$(jq -r '.params.debug // ""' < "${payload}")X" == "X" ]]; then
+  if [[ "$(jq -r '.params.silent // ""' < "${payload}")X" == "X" ]]; then
+    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
   else
     echo "Using silent output"
-    curl -s -X POST --data-urlencode "payload=$body" $webhook_url
+    curl -s -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
   fi
 else
-  echo webhook_url $webhook_url
-  echo body $body
+  echo "webhook_url: ${webhook_url}"
+  echo "body: ${body}"
 fi
 
 jq -n '{version:{ref:0}}' >&3

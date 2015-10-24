@@ -34,6 +34,29 @@ Optional:
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
 - `silent`: *Optional.* Do not print curl output (avoids leaking slack webhook URL)
 
+#### Metadata
+
+Various metadata is available in the form of environment variables. Any environment variables present in the parameters will be automatically evaluated; this enables dynamic parameter content.
+
+The following pipeline config snippet demonstrates how to incorporate the metadata:
+
+```yaml
+---
+jobs:
+- name: some-job
+  plan:
+  - put: slack-alert
+    params:
+      channel: '#my_channel'
+      text: |
+        The build had a result. Check it out at:
+        http://my.concourse.url/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+        or at:
+        http://my.concourse.url/builds/$BUILD_ID
+```
+
+See the [official documentation](http://concourse.ci/implementing-resources.html#resource-metadata) for a complete list of available metadata.
+
 Examples
 --------
 
