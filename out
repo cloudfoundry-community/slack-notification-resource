@@ -85,4 +85,4 @@ else
   echo "body: ${body}"
 fi
 
-jq -n "{version:{timestamp:\"$(date +%s)\"}}"
+jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
