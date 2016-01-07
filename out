@@ -33,6 +33,12 @@ else
   text="$(jq '(.params.text // "")' < "${payload}")"
 fi
 
+if [[ "${text}" == "" ]]; then
+  echo "the text payload is empty"
+  jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
+  exit 0
+fi
+
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
