@@ -45,7 +45,7 @@ icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 channel="$(jq '(.params.channel // null)' < "${payload}")"
 
 if [ "${text}" != "" ]; then
-  text="$(eval "printf ${text}" | jq -R -s .)"
+  text="$(eval "printf '${text}'" | jq -R -s .)"
 fi
 
 if [ "${username}" != "null" ]; then
