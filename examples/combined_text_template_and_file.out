@@ -1,0 +1,11 @@
+{
+  "params": {
+    "text_file": "examples/sample.txt",
+    "text": ":some_emoji:<https://my-ci.my-org.com//pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Alert!>\n$TEXT_FILE_CONTENT\n",
+    "username": "concourse",
+    "debug": "true"
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}
