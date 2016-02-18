@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -e
 
 cd "${1}"
 
@@ -16,55 +16,34 @@ cat > "${payload}" <&0
 
 webhook_url="$(jq -r '.source.url' < "${payload}")"
 
-set -x
-
 text_file="$(jq -r '.params.text_file // ""' < "${payload}")"
-if [[ "${text_file}X" != "X" ]]; then
-  echo "Using dynamic text file: ${text_file}"
-  if [[ -f ${text_file} ]]; then
-    text="$(cat "${text_file}")"
-    echo "Text: ${text}"
-  else
-    echo "Cannot find ${text_file}"
-    exit 1
-  fi
-else
-  echo "Using static text"
-  text="$(jq '(.params.text // "")' < "${payload}")"
-fi
-
-if [[ "${text}" == "" ]]; then
-  echo "the text payload is empty"
-  jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
-  exit 0
-fi
-
+text="$(jq '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 channel="$(jq '(.params.channel // null)' < "${payload}")"
 
-if [ "${text}" != "" ]; then
-  text="$(eval "printf '${text}'" | jq -R -s .)"
-fi
+debug="$(jq -r '.params.debug // "false"' < "${payload}")"
+silent="$(jq -r '.params.silent // "false"' < "${payload}")"
+always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
 
-if [ "${username}" != "null" ]; then
-  username="$(eval "printf ${username}" | jq -R -s .)"
-fi
+TEXT_FILE_CONTENT=""
+[[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
 
-if [ "${icon_url}" != "null" ]; then
-  icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
-fi
+if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
+then
+  TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
 
-if [ "${icon_emoji}" != "null" ]; then
-  icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
-fi
+  text="$(eval printf ${text} )"
+  [[ -z "${text}" ]] && text="_(missing notification text)_"
+  text="$(echo "${text}" | jq -R -s .)"
 
-if [ "${channel}" != "null" ]; then
-  channel="$(eval "printf ${channel}" | jq -R -s .)"
-fi
+  [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
+  [[ "${icon_url}"   != "null" ]] && icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
+  [[ "${icon_emoji}" != "null" ]] && icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
+  [[ "${channel}"    != "null" ]] && channel="$(eval "printf ${channel}" | jq -R -s .)"
 
-body="$(cat <<EOF
+  body="$(cat <<EOF
 {
   "text": ${text},
   "username": ${username},
@@ -73,22 +52,21 @@ body="$(cat <<EOF
   "channel": ${channel}
 }
 EOF
-)"
+  )"
 
-compact_body="$(echo "${body}" | jq -c '.')"
+  compact_body="$(echo "${body}" | jq -c '.')"
 
-set +x
-
-if [[ "$(jq -r '.params.debug // ""' < "${payload}")X" == "X" ]]; then
-  if [[ "$(jq -r '.params.silent // ""' < "${payload}")X" == "X" ]]; then
-    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
-  else
+  if [[ "$debug" == "true" ]]
+  then
+    echo "webhook_url: ${webhook_url}"
+    echo "body: ${body}"
+  elif [[ "$silent" == "true" ]]
+  then
     echo "Using silent output"
     curl -s -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
+  else
+    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
   fi
-else
-  echo "webhook_url: ${webhook_url}"
-  echo "body: ${body}"
 fi
 
 jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
