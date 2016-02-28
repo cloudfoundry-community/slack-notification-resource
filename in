@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-echo '{"version":{"ref":"none"}}'
-
+jq --compact-output --null-input "{
+  \"version\": {
+    \"time\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"
+  }
+}"

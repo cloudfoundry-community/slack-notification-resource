@@ -1,72 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
-
-cd "${1}"
 
 exec 3>&1
 exec 1>&2
 
-# for jq
-PATH=/usr/local/bin:$PATH
+PAYLOAD=$(</dev/stdin)
+ALWAYS_NOTIFY=$(echo $PAYLOAD | jq --raw-output '.params.always_notify')
+DEBUG=$(echo $PAYLOAD | jq --raw-output '.params.debug')
+WEBHOOK_URL=$(echo $PAYLOAD | jq --raw-output '.source.url')
 
-payload=$(mktemp /tmp/resource-in.XXXXXX)
+TEXT_CONTENT=$(echo $PAYLOAD | jq --raw-output '.params.text')
 
-cat > "${payload}" <&0
+TEXT_FILE=$(echo $PAYLOAD | jq --raw-output '.params.text_file')
+if [[ -n "$TEXT_FILE" && -f "$TEXT_FILE" ]]; then
+  TEXT_FILE_CONTENT=$(cat "$TEXT_FILE" | jq --raw-input --slurp '.')
+  TEXT_FILE_CONTENT=$(eval echo $TEXT_FILE_CONTENT)
+fi
 
-webhook_url="$(jq -r '.source.url' < "${payload}")"
-
-text_file="$(jq -r '.params.text_file // ""' < "${payload}")"
-text="$(jq '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
-username="$(jq '(.params.username // null)' < "${payload}")"
-icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
-icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
-channel="$(jq '(.params.channel // null)' < "${payload}")"
-
-debug="$(jq -r '.params.debug // "false"' < "${payload}")"
-silent="$(jq -r '.params.silent // "false"' < "${payload}")"
-always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
-
-TEXT_FILE_CONTENT=""
-[[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
-
-if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
+if [[ -n "$TEXT_CONTENT" || -n "$TEXT_FILE_CONTENT" || "$ALWAYS_NOTIFY" == "true" ]]
 then
   TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
 
-  text="$(eval printf ${text} )"
-  [[ -z "${text}" ]] && text="_(missing notification text)_"
-  text="$(echo "${text}" | jq -R -s .)"
+  BODY=$(echo $PAYLOAD | jq --compact-output '
+    .params |
+    del(.always_notify, .debug, .text_file) |
+    if (.text or .attachments | not) then .text = "$TEXT_FILE_CONTENT" else . end |
+    if (.text == "") then .text = "_(missing notification text)_" else . end |
+    "\(.)"')
 
-  [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
-  [[ "${icon_url}"   != "null" ]] && icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
-  [[ "${icon_emoji}" != "null" ]] && icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
-  [[ "${channel}"    != "null" ]] && channel="$(eval "printf ${channel}" | jq -R -s .)"
-
-  body="$(cat <<EOF
-{
-  "text": ${text},
-  "username": ${username},
-  "icon_url": ${icon_url},
-  "icon_emoji": ${icon_emoji},
-  "channel": ${channel}
-}
-EOF
-  )"
-
-  compact_body="$(echo "${body}" | jq -c '.')"
-
-  if [[ "$debug" == "true" ]]
-  then
-    echo "webhook_url: ${webhook_url}"
-    echo "body: ${body}"
-  elif [[ "$silent" == "true" ]]
-  then
-    echo "Using silent output"
-    curl -s -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
+  if [[ "$DEBUG" == "true" ]]; then
+    printf "Webhook URL:  $WEBHOOK_URL\n"
+    printf "Webhook Body: \n$(eval echo "$BODY" | jq --color-output '.')\n"
   else
-    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
+    eval curl --request POST --header "'Content-type: application/json'" --data "$BODY" "$WEBHOOK_URL"
+
+    jq --compact-output --null-input "{
+      \"version\": {
+        \"time\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"
+      }
+    }" >&3
   fi
 fi
-
-jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
