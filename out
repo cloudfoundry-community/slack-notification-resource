@@ -58,8 +58,15 @@ EOF
 
   if [[ "$debug" == "true" ]]
   then
-    echo "webhook_url: ${webhook_url}"
-    echo "body: ${body}"
+    json="$(cat <<EOF
+{
+  "webhook_url": "${webhook_url}",
+  "body": ${body}
+}
+EOF
+)" 
+    echo "$json" | jq -c '.'
+    exit 0
   elif [[ "$silent" == "true" ]]
   then
     echo "Using silent output"

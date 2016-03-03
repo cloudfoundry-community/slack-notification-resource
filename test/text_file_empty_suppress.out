@@ -1,8 +1,7 @@
 {
   "params": {
-    "text_file": "examples/sample-empty.txt",
+    "text_file": "sample-empty.txt",
     "username": "concourse",
-    "always_notify": "true",
     "debug": "true"
   },
   "source": {
