@@ -1,0 +1,179 @@
+---
+#
+# ci/pipeline.yml
+#
+# Pipeline structure file for a Docker Image pipeline
+#
+# DO NOT MAKE CHANGES TO THIS FILE.  Instead, modify
+# ci/settings.yml and override what needs overridden.
+# This uses spruce, so you have some options there.
+#
+# author:  James Hunt <james@niftylogic.com>
+#          Dennis Bell <dennis.j.bell@gmail.com>
+# created: 2016-03-04
+
+meta:
+  name:     (( param "Please name your pipeline" ))
+  target:   (( param "Please identify the name of the target Concourse CI" ))
+  pipeline: (( grab meta.name ))
+
+  aws:
+    bucket:     (( concat meta.name "-pipeline" ))
+    access_key: (( param "Please set your AWS Access Key ID" ))
+    secret_key: (( param "Please set your AWS Secret Key ID" ))
+
+  github:
+    uri:          (( concat "git@github.com:" meta.github.owner "/" meta.github.repo ))
+    owner:        (( param "Please specify the name of the user / organization that owns the Github repository" ))
+    repo:         (( param "Please specify the name of the Github repository" ))
+    branch:       master
+    private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
+    access_token: (( param "Please generate a Personal Access Token and specify it here" ))
+
+  dockerhub:
+    email:      (( param "Please specify the email address for your Dockerhub account" ))
+    username:   (( param "Please specify the username for your Dockerhub account" ))
+    password:   (( param "Please specify the password for your Dockerhub account" ))
+    repository: (( param "Please specify the name of the image (repo/name) that you are building" ))
+
+  slack:
+    webhook:       (( param "Please specify your Slack Incoming Webhook Integration URL" ))
+    notification: '(( concat ":sadpanda: " meta.name " build failed!<br>URL-GOES-HERE" ))'
+    channel:       (( param "Please specify the channel (#name) or user (@user) to send messages to" ))
+    username:      concourse
+    icon:          http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+jobs:
+  - name: build
+    public: true
+    serial: true
+    plan:
+      - get: git
+        trigger: true
+      - put: edge
+        params: { build: git }
+        on_failure:
+          put: notify
+          params:
+            channel:  (( grab meta.slack.channel ))
+            username: (( grab meta.slack.username ))
+            icon_url: (( grab meta.slack.icon ))
+            text:     (( grab meta.slack.notification ))
+
+  - name: minor
+    public: true
+    plan:
+      - { get: version, trigger: false, params: {bump: minor} }
+      - { put: version,                 params: {file: version/number} }
+
+  - name: major
+    public: true
+    plan:
+      - { get: version, trigger: false, params: {bump: major} }
+      - { put: version,                 params: {file: version/number} }
+
+  - name: promote
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+          - { get: version }
+          - { get: edge, passed: [build], params: { save: true } }
+          - { get: git,  passed: [build] }
+
+      - task: release
+        config:
+          image: docker:///starkandwayne/concourse
+          platform: linux
+          inputs:
+            - name: git
+            - name: version
+          outputs:
+            - name: gh
+            - name: pushme
+          run:
+            path: ./git/ci/scripts/release
+            args: []
+          params:
+            REPO_ROOT:    git
+            RELEASE_ROOT: gh
+            REPO_OUT:     pushme/git
+            VERSION_FROM: version/number
+
+      - put: latest # as 'latest'
+        params:
+          load_base:       edge
+          load_file:       edge/image
+          load_repository: (( grab meta.dockerhub.repository ))
+          load_tag:        edge
+
+      - put: latest # as 'vX.Y.Z'
+        params:
+          tag:             version/number
+          tag_prefix:      v
+          load_base:       edge
+          load_file:       edge/image
+          load_repository: (( grab meta.dockerhub.repository ))
+          load_tag:        edge
+
+      - aggregate:
+        - put: version
+          params:
+            bump: patch
+        - put: git
+          params:
+            rebase: true
+            repository: pushme/git
+        - put: github
+          params:
+            name: gh/name
+            tag:  gh/tag
+            body: gh/notes.md
+
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: starkandwaynebot/slack-notification-resource
+
+resources:
+  - name: git
+    type: git
+    source:
+      uri:         (( grab meta.github.uri ))
+      branch:      (( grab meta.github.branch ))
+      private_key: (( grab meta.github.private_key ))
+
+  - name: edge
+    type: docker-image
+    source:
+      .: (( inject meta.dockerhub ))
+      tag: edge
+
+  - name: latest
+    type: docker-image
+    source:
+      .: (( inject meta.dockerhub ))
+      tag: latest
+
+  - name: version
+    type: semver
+    source :
+      driver:            s3
+      bucket:            (( grab meta.aws.bucket ))
+      key:               version
+      access_key_id:     (( grab meta.aws.access_key ))
+      secret_access_key: (( grab meta.aws.secret_key ))
+      initial_version:   (( grab meta.initial_version || 0.0.1 ))
+
+  - name: notify
+    type: slack-notification
+    source:
+      url: (( grab meta.slack.webhook ))
+
+  - name: github
+    type: github-release
+    source:
+      user:         (( grab meta.github.owner ))
+      repository:   (( grab meta.github.repo ))
+      access_token: (( grab meta.github.access_token ))

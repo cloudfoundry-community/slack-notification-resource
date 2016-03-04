@@ -1,0 +1,35 @@
+#!/bin/bash
+
+cd $(dirname $BASH_SOURCE[0])
+echo "Working in $(pwd)"
+
+if [[ -z "$VAULT_ADDR" ]] ; then
+	echo >&2 "Vault address not specified in VAULT_ADDR environment variable"
+	exit 1
+fi
+
+if [[ ! -f settings.yml ]]; then
+	echo >&2 "Missing local settings in ci/settings.yml!"
+	exit 1
+fi
+
+set -e
+trap "rm -f .deploy.yml" QUIT TERM EXIT INT
+spruce merge pipeline.yml settings.yml > .deploy.yml
+PIPELINE=$(spruce json .deploy.yml | jq -r '.meta.pipeline // ""')
+if [[ -z ${PIPELINE} ]]; then
+	echo >&2 "Missing pipeline name in ci/settings.yml!"
+	exit 1
+fi
+[ -n ${CONCOURSE_TARGET} ] && TARGET=${CONCOURSE_TARGET}
+if [[ -z ${TARGET} ]]; then
+	TARGET=$(spruce json .deploy.yml | jq -r '.meta.target // ""')
+fi
+if [[ -z ${TARGET} ]]; then
+	echo >&2 "Missing Concourse Target in ci/settings.yml!"
+	exit 1
+fi
+
+set +x
+fly --target ${TARGET} set-pipeline     --pipeline ${PIPELINE} --config .deploy.yml
+fly --target ${TARGET} unpause-pipeline --pipeline ${PIPELINE}
