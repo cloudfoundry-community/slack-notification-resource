@@ -1,7 +1,8 @@
 ---
 # settings for the slack-notification-resource pipeline
 meta:
-  target: sw # https://ci.vsphere.starkandwayne.com
+  target: sw
+  url:    https://ci.vsphere.starkandwayne.com
   name:   slack-notification
 
   initial_version: 0.0.1
