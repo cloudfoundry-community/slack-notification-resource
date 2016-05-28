@@ -82,6 +82,8 @@ Optional:
 - `silent`: *Optional.* Do not print curl output (avoids leaking slack webhook URL)
 - `always_notify`: *Optional.* Attempt to notify even if there are errors or missing text. (Expects true or false, defaults to false)
 
+Explore formatting with Slack's [Message Builder](https://api.slack.com/docs/formatting/builder).
+
 #### Metadata
 
 Various metadata is available in the form of environment variables. Any environment variables present in the parameters will be automatically evaluated; this enables dynamic parameter content.
