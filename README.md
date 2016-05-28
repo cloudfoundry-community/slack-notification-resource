@@ -3,12 +3,33 @@ Slack notification sending resource
 
 Sends messages to [Slack](https://slack.com).
 
+Resource Type Configuration
+---------------------------
+
+```yaml
+---
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+```
+
 Source Configuration
 --------------------
 
 To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to https://my.slack.com/services/new/incoming-webhook/.
 
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
+
+```
+resources:
+- name: slack-message
+  type: slack-notification
+  source:
+    uri: https://hooks.slack.com/services/XXXX
+```
 
 Behavior
 --------
