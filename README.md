@@ -6,6 +6,8 @@ Sends messages to [Slack](https://slack.com).
 Source Configuration
 --------------------
 
+To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to https://my.slack.com/services/new/incoming-webhook/.
+
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
 
 Behavior
