@@ -27,7 +27,7 @@ resources:
 - name: slack-message
   type: slack-notification
   source:
-    uri: https://hooks.slack.com/services/XXXX
+    url: https://hooks.slack.com/services/XXXX
 ```
 
 Behavior
