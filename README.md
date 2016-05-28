@@ -7,7 +7,6 @@ Resource Type Configuration
 ---------------------------
 
 ```yaml
----
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -23,7 +22,7 @@ To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to ht
 
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
 
-```
+```yaml
 resources:
 - name: slack-message
   type: slack-notification
