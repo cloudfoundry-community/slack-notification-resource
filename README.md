@@ -24,7 +24,7 @@ To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to ht
 
 ```yaml
 resources:
-- name: slack-message
+- name: slack-alert
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/XXXX
