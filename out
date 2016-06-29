@@ -80,7 +80,7 @@ EOF
   elif [[ ${redact_hook} == "true" ]]
   then
     url_path="$(echo ${webhook_url} | sed -e "s/https\{0,1\}:\/\/[^\/]*\(\/[^?&#]\).*/\1/")"
-    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   else
     curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   fi
