@@ -113,11 +113,13 @@ test text_file_empty_suppress | jq -e "
   ( .version | keys == [\"timestamp\"] )"
 
 test metadata | jq -e "
-  ( .version | keys == [\"timestamp\"] ) and
-  ( .metadata[0].name == \"text\" )     and ( .metadata[0].value == \"Inline static text\n\" ) and
-  ( .metadata[1].name == \"username\" ) and ( .metadata[1].value  == \"concourse\" ) and
-  ( .metadata[2].name == \"channel\" )  and ( .metadata[2].value  == \"#some_channel\" ) and
-  ( .metadata[3].name == \"url\" )      and ( .metadata[3].value  == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" )
-  "
+  ( .version | keys == [\"timestamp\"] )        and
+  ( .metadata[0].name == \"url\" )              and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
+  ( .metadata[1].name == \"channel\" )          and ( .metadata[1].value == \"#some_channel\" ) and
+  ( .metadata[2].name == \"username\" )         and ( .metadata[2].value == \"concourse\" ) and
+  ( .metadata[3].name == \"text\" )             and ( .metadata[3].value == \"Inline static text\n\" ) and
+  ( .metadata[4].name == \"text_file\" )        and ( .metadata[4].value == \"\" ) and
+  ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and 
+  ( .metadata[7].name == \"payload\" )          and ( .metadata[7].value | fromjson.source.url == \"***REDACTED***\" )"
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'

@@ -84,13 +84,21 @@ fi
 if [[ "$show_metadata" == "true" ]]
 then
   redacted_webhook_url=$(echo "${webhook_url}" | sed -e 's#/\([^/\.]\{2\}\)[^/.]\{5,\}\([^/.]\{2\}\)#/\1…\2#g' | jq -R .)
+  escaped_text_file="$(echo $text_file | jq -R -s . )"
+  escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
+  escaped_content="$(echo $TEXT_FILE_CONTENT | jq -R -s . )"
+  text_file_exists="No" && [[ -n "$text_file" ]] && [[ -f "$text_file" ]] && text_file_exists=Yes
   metadata="$(cat <<EOF
 {
   "metadata": [
-    {"name": "text",     "value": ${text}                },
-    {"name": "username", "value": ${username}            },
-    {"name": "channel",  "value": ${channel}             },
-    {"name": "url",      "value": ${redacted_webhook_url}}
+    {"name": "url",               "value": ${redacted_webhook_url}},
+    {"name": "channel",           "value": ${channel}             },
+    {"name": "username",          "value": ${username}            },
+    {"name": "text",              "value": ${text}                },
+    {"name": "text_file",         "value": $( echo "$text_file"         | jq -R . ) },
+    {"name": "text_file_exists",  "value": $( echo "$text_file_exists"  | jq -R . ) },
+    {"name": "text_file_content", "value": $( echo "$TEXT_FILE_CONTENT" | jq -R . ) },
+    {"name": "payload",           "value": $escaped_payload }
   ]
 }
 EOF
