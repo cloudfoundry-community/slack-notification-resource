@@ -112,4 +112,12 @@ test text_file_empty_suppress | jq -e "
   ( . | keys | length == 1 ) and
   ( .version | keys == [\"timestamp\"] )"
 
+test metadata | jq -e "
+  ( .version | keys == [\"timestamp\"] ) and
+  ( .metadata[0].name == \"text\" )     and ( .metadata[0].value == \"Inline static text\n\" ) and
+  ( .metadata[1].name == \"username\" ) and ( .metadata[1].value  == \"concourse\" ) and
+  ( .metadata[2].name == \"channel\" )  and ( .metadata[2].value  == \"#some_channel\" ) and
+  ( .metadata[3].name == \"url\" )      and ( .metadata[3].value  == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" )
+  "
+
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'

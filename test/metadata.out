@@ -1,0 +1,12 @@
+{
+  "params": {
+    "text":     "Inline static text",
+    "username": "concourse",
+    "channel":  "#some_channel",
+    "debug":    "true",
+    "metadata": "true"
+  },
+  "source": {
+    "url": "https://hooks.slack.com/services/TH68FHGIS/DO3A4DHES/WOHn386NE4t64Hnae3T684RK"
+  }
+}

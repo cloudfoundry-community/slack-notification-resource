@@ -24,11 +24,16 @@ icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 channel="$(jq '(.params.channel // null)' < "${payload}")"
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
+show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
 silent="$(jq -r '.params.silent // "false"' < "${payload}")"
 always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
 
 TEXT_FILE_CONTENT=""
 [[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
+
+debug_info=""
+metadata=""
+body=""
 
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
 then
@@ -58,15 +63,13 @@ EOF
 
   if [[ "$debug" == "true" ]]
   then
-    json="$(cat <<EOF
+    debug_info="$(cat <<EOF
 {
   "webhook_url": "${webhook_url}",
   "body": ${body}
 }
 EOF
 )" 
-    echo "$json" | jq -c '.'
-    exit 0
   elif [[ "$silent" == "true" ]]
   then
     echo "Using silent output"
@@ -74,6 +77,25 @@ EOF
   else
     curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
   fi
+else
+  text="$(echo "" | jq -R -s .)"
 fi
 
-jq -n "{version:{timestamp:\"$(date +%s)\"}}" >&3
+if [[ "$show_metadata" == "true" ]]
+then
+  redacted_webhook_url=$(echo "${webhook_url}" | sed -e 's#/\([^/\.]\{2\}\)[^/.]\{5,\}\([^/.]\{2\}\)#/\1…\2#g' | jq -R .)
+  metadata="$(cat <<EOF
+{
+  "metadata": [
+    {"name": "text",     "value": ${text}                },
+    {"name": "username", "value": ${username}            },
+    {"name": "channel",  "value": ${channel}             },
+    {"name": "url",      "value": ${redacted_webhook_url}}
+  ]
+}
+EOF
+  )"
+fi
+
+timestamp="$(jq -n "{version:{timestamp:\"$(date +%s)\"}}")"
+echo "$timestamp $metadata $debug_info " | jq -s add  >&3
