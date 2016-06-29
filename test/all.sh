@@ -12,6 +12,7 @@ on_exit() {
 trap on_exit EXIT
 
 test() {
+  set -e
   base_dir="$(cd "$(dirname $0)" ; pwd )"
   if [ -f "${base_dir}/../out" ] ; then
     cmd="../out"
@@ -19,7 +20,7 @@ test() {
     cmd="/opt/resource/out"
   fi
 
-  header="$(cat <<EOM
+  cat <<EOM >&2
 ------------------------------------------------------------------------------
 TESTING: $1
 
@@ -28,11 +29,11 @@ $(cat ${base_dir}/${1}.out)
 
 Output:
 EOM
-  )"
-  echo "$header" >&2
 
-
-  (cd $base_dir && cat ${1}.out | $cmd . 2>&1 | tee /dev/stderr)
+  result="$(cd $base_dir && cat ${1}.out | $cmd . 2>&1 | tee /dev/stderr)"
+  echo >&2 "" 
+  echo >&2 "Result:" 
+  echo "$result" # to be passed into jq -e
 }
 
 export BUILD_PIPELINE_NAME='my-pipeline'
@@ -109,7 +110,8 @@ test text_file_empty | jq -e "
   ( .body | keys | length ==  5 )"
 
 test text_file_empty_suppress | jq -e "
-  ( . | keys | length == 1 ) and
+  ( . | keys | length == 2 ) and
+  ( . | keys | contains([\"version\",\"metadata\"]) ) and
   ( .version | keys == [\"timestamp\"] )"
 
 test metadata | jq -e "
@@ -120,6 +122,17 @@ test metadata | jq -e "
   ( .metadata[3].name == \"text\" )             and ( .metadata[3].value == \"Inline static text\n\" ) and
   ( .metadata[4].name == \"text_file\" )        and ( .metadata[4].value == \"\" ) and
   ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and 
-  ( .metadata[7].name == \"payload\" )          and ( .metadata[7].value | fromjson.source.url == \"***REDACTED***\" )"
+  ( .metadata | length == 7 )"
+
+test metadata_with_payload | jq -e "
+  ( .version | keys == [\"timestamp\"] )        and
+  ( .metadata[0].name == \"url\" )              and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
+  ( .metadata[1].name == \"channel\" )          and ( .metadata[1].value == \"#some_channel\" ) and
+  ( .metadata[2].name == \"username\" )         and ( .metadata[2].value == \"concourse\" ) and
+  ( .metadata[3].name == \"text\" )             and ( .metadata[3].value == \"Inline static text\n\" ) and
+  ( .metadata[4].name == \"text_file\" )        and ( .metadata[4].value == \"\" ) and
+  ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and 
+  ( .metadata[7].name == \"payload\" )          and ( .metadata[7].value | fromjson.source.url == \"***REDACTED***\" ) and
+  ( .metadata | length == 8 )"
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'

@@ -24,9 +24,12 @@ icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 channel="$(jq '(.params.channel // null)' < "${payload}")"
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
-show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
+show_metadata="$(jq -r '.params.metadata // "true"' < "${payload}")"
+show_payload="$(jq -r '.params.payload_in_metadata // "false"' < "${payload}")"
 silent="$(jq -r '.params.silent // "false"' < "${payload}")"
 always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
+redact_hook="$(jq -r '.params.redact_hook // "true"' < "${payload}")"
+
 
 TEXT_FILE_CONTENT=""
 [[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
@@ -74,8 +77,12 @@ EOF
   then
     echo "Using silent output"
     curl -s -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
+  elif [[ ${redact_hook} == "true" ]]
+  then
+    url_path="$(echo ${webhook_url} | sed -e "s/https?:\/\/[^\/]*\(\/[^?&#]\).*/\1/")"
+    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   else
-    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
+    curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   fi
 else
   text="$(echo "" | jq -R -s .)"
@@ -85,7 +92,13 @@ if [[ "$show_metadata" == "true" ]]
 then
   redacted_webhook_url=$(echo "${webhook_url}" | sed -e 's#/\([^/\.]\{2\}\)[^/.]\{5,\}\([^/.]\{2\}\)#/\1…\2#g' | jq -R .)
   escaped_text_file="$(echo $text_file | jq -R -s . )"
-  escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
+  if [[ ${redact_hook} == "true" ]]
+  then
+    escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
+  else
+    escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
+  fi
+
   escaped_content="$(echo $TEXT_FILE_CONTENT | jq -R -s . )"
   text_file_exists="No" && [[ -n "$text_file" ]] && [[ -f "$text_file" ]] && text_file_exists=Yes
   metadata="$(cat <<EOF
@@ -97,12 +110,16 @@ then
     {"name": "text",              "value": ${text}                },
     {"name": "text_file",         "value": $( echo "$text_file"         | jq -R . ) },
     {"name": "text_file_exists",  "value": $( echo "$text_file_exists"  | jq -R . ) },
-    {"name": "text_file_content", "value": $( echo "$TEXT_FILE_CONTENT" | jq -R . ) },
-    {"name": "payload",           "value": $escaped_payload }
+    {"name": "text_file_content", "value": $( echo "$TEXT_FILE_CONTENT" | jq -R -s . ) }
   ]
 }
 EOF
   )"
+  if [[ "${show_payload}" == "true" ]]
+  then
+    metadata="$( echo ${metadata} | jq -r ".metadata += [{name: \"payload\", value: $escaped_payload}]")"
+  fi
+
 fi
 
 timestamp="$(jq -n "{version:{timestamp:\"$(date +%s)\"}}")"
