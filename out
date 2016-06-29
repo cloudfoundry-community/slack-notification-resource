@@ -24,11 +24,11 @@ icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 channel="$(jq '(.params.channel // null)' < "${payload}")"
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
-show_metadata="$(jq -r '.params.metadata // "true"' < "${payload}")"
+show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
 show_payload="$(jq -r '.params.payload_in_metadata // "false"' < "${payload}")"
 silent="$(jq -r '.params.silent // "false"' < "${payload}")"
 always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
-redact_hook="$(jq -r '.params.redact_hook // "true"' < "${payload}")"
+redact_hook="$(jq -r '.params.redact_hook_url // "true"' < "${payload}")"
 
 
 TEXT_FILE_CONTENT=""
@@ -79,7 +79,7 @@ EOF
     curl -s -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}"
   elif [[ ${redact_hook} == "true" ]]
   then
-    url_path="$(echo ${webhook_url} | sed -e "s/https?:\/\/[^\/]*\(\/[^?&#]\).*/\1/")"
+    url_path="$(echo ${webhook_url} | sed -e "s/https\{0,1\}:\/\/[^\/]*\(\/[^?&#]\).*/\1/")"
     curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   else
     curl -v -X POST --data-urlencode "payload=${compact_body}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"

@@ -110,8 +110,8 @@ test text_file_empty | jq -e "
   ( .body | keys | length ==  5 )"
 
 test text_file_empty_suppress | jq -e "
-  ( . | keys | length == 2 ) and
-  ( . | keys | contains([\"version\",\"metadata\"]) ) and
+  ( . | keys | length == 1 ) and
+  ( . | keys | contains([\"version\"]) ) and
   ( .version | keys == [\"timestamp\"] )"
 
 test metadata | jq -e "
