@@ -21,6 +21,24 @@ Source Configuration
 To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to https://my.slack.com/services/new/incoming-webhook/.
 
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
+-   `insecure`: *Optional.* Connect to Concourse insecurely - i.e. skip SSL validation. Defaults to false if not provided.
+-   `ca_certs`: *Optional.* An array of objects with the following format:
+
+  ```yaml
+  ca_certs:
+  - domain: example.com
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+  - domain: 10.244.6.2
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+  ```
+
+  Each entry specifies the x509 CA certificate for the trusted domain.
 
 ```yaml
 resources:
