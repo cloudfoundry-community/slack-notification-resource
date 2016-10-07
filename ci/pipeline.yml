@@ -111,19 +111,13 @@ jobs:
 
       - put: latest # as 'latest'
         params:
-          load_base:       edge
-          load_file:       edge/image
-          load_repository: (( grab meta.dockerhub.repository ))
-          load_tag:        edge
+          load:       edge
 
       - put: latest # as 'vX.Y.Z'
         params:
           tag:             version/number
           tag_prefix:      v
-          load_base:       edge
-          load_file:       edge/image
-          load_repository: (( grab meta.dockerhub.repository ))
-          load_tag:        edge
+          load:       edge
 
       - aggregate:
         - put: version
