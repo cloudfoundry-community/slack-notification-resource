@@ -3,7 +3,7 @@
 meta:
   target: sw
   url:    https://ci.vsphere.starkandwayne.com
-  name:   slack-notification
+  name:   slack-notification-resource
 
   initial_version: 0.0.1
 
