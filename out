@@ -23,7 +23,7 @@ text="$(jq '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
-channel="$(jq '(.params.channel // null)' < "${payload}")"
+channels="$(jq -r '(.params.channel // null)' < "${payload}")"
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
 show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
@@ -48,6 +48,9 @@ fi
 TEXT_FILE_CONTENT=""
 [[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
 
+for channel in ${channels}
+do
+
 debug_info=""
 metadata=""
 body=""
@@ -69,7 +72,7 @@ then
   [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
   [[ "${icon_url}"   != "null" ]] && icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
   [[ "${icon_emoji}" != "null" ]] && icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
-  [[ "${channel}"    != "null" ]] && channel="$(eval "printf ${channel}" | jq -R -s .)"
+  [[ "${channel}"    != "null" ]] && channel=\"${channel}\" && channel="$(eval "printf ${channel}" | jq -R -s .)"
 
   body="$(cat <<EOF
 {
@@ -108,6 +111,8 @@ else
   text="$(echo "" | jq -R -s .)"
 fi
 
+done
+
 if [[ "$show_metadata" == "true" ]]
 then
   redacted_webhook_url=$(echo "${webhook_url}" | sed -e 's#/\([^/\.]\{2\}\)[^/.]\{5,\}\([^/.]\{2\}\)#/\1…\2#g' | jq -R .)
@@ -125,7 +130,7 @@ then
 {
   "metadata": [
     {"name": "url",               "value": ${redacted_webhook_url}},
-    {"name": "channel",           "value": ${channel}             },
+    {"name": "channel",           "value": "${channels}"          },
     {"name": "username",          "value": ${username}            },
     {"name": "text",              "value": ${text}                },
     {"name": "text_file",         "value": $( echo "$text_file"         | jq -R . ) },

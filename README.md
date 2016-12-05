@@ -93,7 +93,7 @@ the following will be sent under these conditions:
 
 Optional:
 
--	`channel`: *Optional.* Override channel to send message to. `#channel` and `@user` forms are allowed.
+-	`channel`: *Optional.* Override channel to send message to. `#channel` and `@user` forms are allowed. You can notify multiple channels separated by whitespace, like `#channel @user`.
 -	`username`: *Optional.* Override name of the sender of the message.
 -	`icon_url`: *Optional.* Override icon by providing URL to the image.
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
