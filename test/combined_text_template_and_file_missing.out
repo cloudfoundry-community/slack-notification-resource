@@ -1,7 +1,7 @@
 {
   "params": {
     "text_file": "sample-missing.txt",
-    "text": ":some_emoji:<https://my-ci.my-org.com/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Alert!>\n$TEXT_FILE_CONTENT\n",
+    "text": ":some_emoji:<https://my-ci.my-org.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Alert!>\n$TEXT_FILE_CONTENT\n",
     "username": "concourse",
     "always_notify": "true",
     "debug": "true"
