@@ -5,7 +5,7 @@ meta:
   url:    https://ci.vsphere.starkandwayne.com
   name:   slack-notification-resource
 
-  initial_version: 0.0.1
+  initial_version: 1.1.0
 
   aws:
     access_key: (( vault "secret/aws/cfcommunity:access" ))
