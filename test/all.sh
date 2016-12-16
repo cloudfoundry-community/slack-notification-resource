@@ -39,6 +39,7 @@ EOM
 export BUILD_PIPELINE_NAME='my-pipeline'
 export BUILD_JOB_NAME='my-job'
 export BUILD_NAME='my-build'
+export BUILD_TEAM_NAME='main'
 
 webhook_url='https://some.url'
 base_text=":some_emoji:<https://my-ci.my-org.com/teams/main/pipelines/my-pipeline/jobs/my-job/builds/my-build|Alert!>"
