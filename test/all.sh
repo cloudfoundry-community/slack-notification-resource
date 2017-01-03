@@ -55,8 +55,9 @@ test combined_text_template_and_file | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${sample_text}\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 
 test combined_text_template_and_file_empty | jq -e "
@@ -66,8 +67,9 @@ test combined_text_template_and_file_empty | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${missing_text}\n\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 
 test combined_text_template_and_file_missing | jq -e "
@@ -77,8 +79,9 @@ test combined_text_template_and_file_missing | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${missing_text}\n\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
@@ -87,8 +90,9 @@ test text | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"Inline static text\n\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
@@ -97,8 +101,9 @@ test text_file | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${sample_text}\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file_empty | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
@@ -107,8 +112,9 @@ test text_file_empty | jq -e "
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${missing_text}\n\" and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.attachments == null and
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file_empty_suppress | jq -e "
   ( . | keys | length == 1 ) and
@@ -135,5 +141,17 @@ test metadata_with_payload | jq -e "
   ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and
   ( .metadata[7].name == \"payload\" )          and ( .metadata[7].value | fromjson.source.url == \"***REDACTED***\" ) and
   ( .metadata | length == 8 )"
+
+test attachments_no_text | jq -e "
+  .body.text == null and
+  .body.attachments[0].color == \"danger\" and
+  .body.attachments[0].text == \"Build failed!\" and
+  ( .body.attachments | length == 1 )"
+
+test attachments_with_text | jq -e "
+  .body.text == \"Inline static text\n\" and
+  .body.attachments[0].color == \"danger\" and
+  .body.attachments[0].text == \"Build failed!\" and
+  ( .body.attachments | length == 1 )"
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'
