@@ -66,7 +66,7 @@ previous task step in the Concourse job.
 - `attachments`: An array of one or more message attachments. See the [Slack documentation on message
 attachments](https://api.slack.com/docs/message-attachments) for the message structure.
 
-If you ommit the `text`, the content of the file specified in the
+If you ommit the `text` parameter, the content of the file specified in the
 `text_file` parameter will be used verbatim.  Alternatively, you can include
 the environment variable `$TEXT_FILE_CONTENT` in the `text` string to include
 the content of the file with other static text and interpolated variables (see
