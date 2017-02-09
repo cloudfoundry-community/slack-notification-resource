@@ -64,8 +64,7 @@ fi
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
 then
   TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
-
-  text="$(eval printf ${text} )"
+  text="$(eval printf "%b" ${text} )"
   [[ -z "${text}" ]] && text="_(missing notification text)_"
   text="$(echo "${text}" | jq -R -s .)"
 
