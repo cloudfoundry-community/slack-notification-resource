@@ -160,9 +160,10 @@ test multiple_channels | jq -e "
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
-  .body.text == \"Inline static text\n\" and 
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
-  ( .body | keys | length ==  5 )"
+  .body.text == \"Inline static text\n\" and
+  ( .body | keys | contains([\"attachments\", \"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
+  ( .body | keys | length ==  6 ) and
+  .body.attachments == null"
 
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'
