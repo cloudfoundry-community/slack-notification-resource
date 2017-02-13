@@ -1,0 +1,11 @@
+{
+  "params": {
+    "text": "Inline static text",
+    "username": "concourse",
+    "debug": "true",
+    "channel": "#some_channel #another_channel"
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}

@@ -154,4 +154,15 @@ test attachments_with_text | jq -e "
   .body.attachments[0].text == \"Build failed!\" and
   ( .body.attachments | length == 1 )"
 
+test multiple_channels | jq -e "
+  .webhook_url == $(echo $webhook_url | jq -R .) and
+  .body.channel == \"#another_channel\" and
+  .body.icon_url == null and
+  .body.icon_emoji == null and
+  .body.username == $(echo $username | jq -R .) and
+  .body.text == \"Inline static text\n\" and 
+  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\"]) ) and
+  ( .body | keys | length ==  5 )"
+
+
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'
