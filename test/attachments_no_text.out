@@ -1,0 +1,16 @@
+{
+  "params": {
+    "username": "concourse",
+    "always_notify": "true",
+    "debug": "true",
+    "attachments": [
+      {
+        "color": "danger",
+        "text": "Build failed!"
+      }
+    ]
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}

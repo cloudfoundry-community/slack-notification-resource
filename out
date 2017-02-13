@@ -23,7 +23,9 @@ text="$(jq '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
+
 channels="$(jq -r '(.params.channel // null)' < "${payload}")"
+attachments=$(jq -r '(.params.attachments // null)' < $payload)
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
 show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
@@ -63,10 +65,19 @@ fi
 
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
 then
-  TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
+  if [[ "${attachments}" == "null" ]]
+  then
+    TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
+  fi
+
   text="$(eval printf "%b" ${text} )"
-  [[ -z "${text}" ]] && text="_(missing notification text)_"
-  text="$(echo "${text}" | jq -R -s .)"
+  if [[ -z "${text}" ]]
+  then
+    text="_(missing notification text)_"
+    [[ -n "${attachments}" ]] && text="null"
+  else
+    text="$(echo "${text}" | jq -R -s .)"
+  fi
 
   [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
   [[ "${icon_url}"   != "null" ]] && icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
@@ -79,7 +90,8 @@ then
   "username": ${username},
   "icon_url": ${icon_url},
   "icon_emoji": ${icon_emoji},
-  "channel": ${channel}
+  "channel": ${channel},
+  "attachments": ${attachments}
 }
 EOF
   )"
@@ -94,7 +106,7 @@ EOF
   "body": ${body}
 }
 EOF
-)" 
+)"
   elif [[ "$silent" == "true" ]]
   then
     echo "Using silent output"
