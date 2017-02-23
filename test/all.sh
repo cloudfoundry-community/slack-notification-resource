@@ -145,13 +145,13 @@ test metadata_with_payload | jq -e "
 test attachments_no_text | jq -e "
   .body.text == null and
   .body.attachments[0].color == \"danger\" and
-  .body.attachments[0].text == \"Build failed!\" and
+  .body.attachments[0].text == \"Build my-build failed!\" and
   ( .body.attachments | length == 1 )"
 
 test attachments_with_text | jq -e "
   .body.text == \"Inline static text\n\" and
   .body.attachments[0].color == \"danger\" and
-  .body.attachments[0].text == \"Build failed!\" and
+  .body.attachments[0].text == \"Build my-build failed!\" and
   ( .body.attachments | length == 1 )"
 
 test multiple_channels | jq -e "

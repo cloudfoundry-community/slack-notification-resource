@@ -7,7 +7,7 @@
     "attachments": [
       {
         "color": "danger",
-        "text": "Build failed!"
+        "text": "Build $BUILD_NAME failed!"
       }
     ]
   },
