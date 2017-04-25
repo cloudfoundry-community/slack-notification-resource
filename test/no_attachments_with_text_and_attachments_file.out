@@ -1,0 +1,12 @@
+{
+  "params": {
+    "text": "Inline static text",
+    "username": "concourse",
+    "always_notify": "true",
+    "debug": "true",
+    "attachments_file": "attachment-sample.txt"
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}
