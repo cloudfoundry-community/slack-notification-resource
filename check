@@ -1,4 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 
-echo "[]"
+set -e
 
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+PAYLOAD=$(mktemp /tmp/resource-check.XXXXXX)
+
+cat > "$PAYLOAD" <&0
+
+TS="$(jq -r '.version.timestamp' < "$PAYLOAD")"
+
+jq -n "[
+  { timestamp: $(echo "$TS" | jq -R .) }
+]" >&3
