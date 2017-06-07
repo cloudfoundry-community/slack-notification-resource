@@ -9,10 +9,11 @@ PAYLOAD=$(mktemp /tmp/resource-in.XXXXXX)
 
 cat > "$PAYLOAD" <&0
 
-TS="$(jq -r '.version.timestamp' < "$PAYLOAD")"
+TS=$(jq '.version.timestamp // empty' < "$PAYLOAD")
+[ -z "$TS" ] && TS='"none"'
 
 jq -n "{
   version: {
-    timestamp: $(echo "$TS" | jq -R .)
+    timestamp: $TS
   }
 }" >&3

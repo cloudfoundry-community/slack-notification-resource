@@ -9,8 +9,12 @@ PAYLOAD=$(mktemp /tmp/resource-check.XXXXXX)
 
 cat > "$PAYLOAD" <&0
 
-TS="$(jq -r '.version.timestamp' < "$PAYLOAD")"
+TS=$(jq '.version.timestamp // empty' < "$PAYLOAD")
 
-jq -n "[
-  { timestamp: $(echo "$TS" | jq -R .) }
-]" >&3
+if [ -z "$TS" ]; then
+  echo '[]' >&3
+else
+  jq -n "[
+    { timestamp: $TS }
+  ]" >&3
+fi
