@@ -1,4 +1,19 @@
-#!/bin/bash
+#!/bin/sh
 
-echo '{"version":{"ref":"none"}}'
+set -e
 
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+PAYLOAD=$(mktemp /tmp/resource-in.XXXXXX)
+
+cat > "$PAYLOAD" <&0
+
+TS=$(jq '.version.timestamp // empty' < "$PAYLOAD")
+[ -z "$TS" ] && TS='"none"'
+
+jq -n "{
+  version: {
+    timestamp: $TS
+  }
+}" >&3
