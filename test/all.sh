@@ -154,6 +154,30 @@ test attachments_with_text | jq -e "
   .body.attachments[0].text == \"Build my-build failed!\" and
   ( .body.attachments | length == 1 )"
 
+test attachments_no_text_and_attachments_file | jq -e "
+  .body.text == null and
+  .body.attachments[0].color == \"danger\" and
+  .body.attachments[0].text == \"Build my-build failed!\" and
+  ( .body.attachments | length == 1 )"
+
+test attachments_with_text_and_attachments_file | jq -e "
+  .body.text == \"Inline static text\n\" and
+  .body.attachments[0].color == \"danger\" and
+  .body.attachments[0].text == \"Build my-build failed!\" and
+  ( .body.attachments | length == 1 )"
+
+test no_attachments_no_text_and_attachments_file | jq -e "
+  .body.text == null and
+  .body.attachments[0].color == \"success\" and
+  .body.attachments[0].text == \"Build my-build passed!\" and
+  ( .body.attachments | length == 1 )"
+
+test no_attachments_with_text_and_attachments_file | jq -e "
+  .body.text == \"Inline static text\n\" and
+  .body.attachments[0].color == \"success\" and
+  .body.attachments[0].text == \"Build my-build passed!\" and
+  ( .body.attachments | length == 1 )"
+
 test multiple_channels | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
   .body.channel == \"#another_channel\" and
@@ -166,4 +190,4 @@ test multiple_channels | jq -e "
   .body.attachments == null"
 
 
-echo -e '\e[32;1m'"All tests passed!"'\e[0m'
+echo -e '\e[32;1m'"All tests passed!"'\e[0m' 
