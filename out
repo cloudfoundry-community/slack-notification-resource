@@ -55,8 +55,9 @@ ATTACHMENTS_FILE_CONTENT=""
 [[ -n "${attachments_file}" && -f "${attachments_file}" ]] && ATTACHMENTS_FILE_CONTENT="$(cat "${attachments_file}")"
 if [[ "${attachments}" == "null" && -n $ATTACHMENTS_FILE_CONTENT ]]; then
   attachments=$ATTACHMENTS_FILE_CONTENT
-  attachments=$(echo "$attachments" | envsubst)
 fi
+  
+attachments=$(echo "$attachments" | envsubst)
 
 for channel in ${channels}
 do
