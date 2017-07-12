@@ -18,6 +18,7 @@ meta:
   target:   (( param "Please identify the name of the target Concourse CI" ))
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
+  image:    starkandwayne/concourse
 
   aws:
     bucket:     (( concat meta.name "-pipeline" ))
@@ -93,7 +94,10 @@ jobs:
 
       - task: release
         config:
-          rootfs_uri: docker:///starkandwayne/concourse
+          image_resource:
+            type: docker-image
+            source:
+              repository: (( grab meta.image ))
           platform: linux
           inputs:
             - name: git
