@@ -25,6 +25,7 @@ icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 
 channels="$(jq -r '(.params.channel // null)' < "${payload}")"
+channel_file="$(jq -r '(.params.channel_file // null)' < "${payload}")"
 attachments_file="$(jq -r '.params.attachments_file // ""' < "${payload}")"
 attachments=$(jq -r '(.params.attachments // null)' < $payload)
 
@@ -58,6 +59,8 @@ if [[ "${attachments}" == "null" && -n $ATTACHMENTS_FILE_CONTENT ]]; then
 fi
   
 attachments=$(echo "$attachments" | envsubst)
+
+[[ -n "${channel_file}" && -f "${channel_file}" ]] && channels="${channels} $(cat "${channel_file}")"
 
 for channel in ${channels}
 do
