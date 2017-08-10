@@ -3,6 +3,8 @@ Slack notification sending resource
 
 Sends messages to [Slack](https://slack.com).
 
+* [Build & promote image](https://ci.starkandwayne.com/teams/main/pipelines/slack-notification-resource) via CI
+
 Resource Type Configuration
 ---------------------------
 
