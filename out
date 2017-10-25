@@ -49,7 +49,7 @@ then
   update-ca-certificates
 fi
 
-TEXT_FILE_CONTENT=""
+export TEXT_FILE_CONTENT=""
 [[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
 
 ATTACHMENTS_FILE_CONTENT=""
