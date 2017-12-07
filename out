@@ -19,7 +19,7 @@ allow_insecure="$(jq -r '.source.insecure // "false"' < "${payload}")"
 raw_ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
 
 text_file="$(jq -r '.params.text_file // ""' < "${payload}")"
-text="$(jq '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
+text="$(jq -r '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
@@ -93,20 +93,22 @@ then
       attachment_text="$(jq -r ".[$x].text // "'""' < $workfile)"
       interpolated='{}'
       if [[ -n "$attachment_text" ]]; then
-        interpolated="$(echo $(eval printf "%b" \""$attachment_text"\" | jq -R '{"text":.}'))"
+        interpolated="$(echo $(echo -n "$attachment_text"| envsubst | jq -R '{"text":.}'))"
       fi
       jq -s '.[0] * .[1]' <(jq -r ".[$x]" <$workfile) <(echo "$interpolated") >> $outfile
     done
     attachments=$((echo '['; cat $outfile; echo ']') | jq -r .)
   fi
 
-  text="$(eval printf "%b" ${text} )"
-  if [[ -z "${text}" ]]
+
+  text_interpolated=$(echo -n "$text" |envsubst)
+
+  if [[ -z "${text_interpolated}" ]]
   then
-    text="_(missing notification text)_"
-    [[ -n "${attachments}" ]] && text="null"
+    text_interpolated="_(missing notification text)_"
+    [[ -n "${attachments}" ]] && text_interpolated="null"
   else
-    text="$(echo "${text}" | jq -R -s .)"
+    text_interpolated="$(echo "${text_interpolated}" | jq -R -s .)"
   fi
 
   [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
@@ -116,7 +118,7 @@ then
 
   body="$(cat <<EOF
 {
-  "text": ${text},
+  "text": ${text_interpolated},
   "username": ${username},
   "icon_url": ${icon_url},
   "icon_emoji": ${icon_emoji},
@@ -149,7 +151,7 @@ EOF
     curl -v --data-urlencode "payload=${compact_body}" ${CURL_OPTION} "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   fi
 else
-  text="$(echo "" | jq -R -s .)"
+  text_interplated="$(echo "" | jq -R -s .)"
 fi
 
 done
@@ -173,7 +175,7 @@ then
     {"name": "url",               "value": ${redacted_webhook_url}},
     {"name": "channel",           "value": "${channels}"          },
     {"name": "username",          "value": ${username}            },
-    {"name": "text",              "value": ${text}                },
+    {"name": "text",              "value": ${text_interpolated}   },
     {"name": "text_file",         "value": $( echo "$text_file"         | jq -R . ) },
     {"name": "text_file_exists",  "value": $( echo "$text_file_exists"  | jq -R . ) },
     {"name": "text_file_content", "value": $( echo "$TEXT_FILE_CONTENT" | jq -R -s . ) }
