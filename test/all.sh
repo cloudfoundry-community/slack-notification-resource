@@ -89,7 +89,7 @@ test text | jq -e "
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.username == $(echo $username | jq -R .) and
-  .body.text == \"Inline static text\n\" and
+  .body.text == \"Inline static \`text\`\n\" and
   .body.attachments == null and
   ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"text\",\"attachments\"]) ) and
   ( .body | keys | length ==  6 )"
@@ -151,7 +151,7 @@ test attachments_no_text | jq -e "
 test attachments_with_text | jq -e "
   .body.text == \"Inline static text\n\" and
   .body.attachments[0].color == \"danger\" and
-  .body.attachments[0].text == \"Build my-build failed!\" and
+  .body.attachments[0].text == \"Build \`my-build\` failed!\" and
   ( .body.attachments | length == 1 )"
 
 test attachments_no_text_and_attachments_file | jq -e "

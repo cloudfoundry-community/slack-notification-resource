@@ -1,6 +1,6 @@
 {
   "params": {
-    "text": "Inline static text",
+    "text": "Inline static `text`",
     "username": "concourse",
     "debug": "true"
   },
