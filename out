@@ -36,6 +36,9 @@ silent="$(jq -r '.params.silent // "false"' < "${payload}")"
 always_notify="$(jq -r '.params.always_notify // "false"' < "${payload}")"
 redact_hook="$(jq -r '.params.redact_hook_url // "true"' < "${payload}")"
 
+proxy="$(jq -r '.source.proxy // "null"' < "${payload}")"
+proxy_https_tunnel="$(jq -r '.source.proxy_https_tunnel // "false"' < "${payload}")"
+
 
 cert_count="$(echo $raw_ca_certs | jq -r '. | length')"
 if [[ ${cert_count} -gt 0 ]]
@@ -57,7 +60,7 @@ ATTACHMENTS_FILE_CONTENT=""
 if [[ "${attachments}" == "null" && -n $ATTACHMENTS_FILE_CONTENT ]]; then
   attachments=$ATTACHMENTS_FILE_CONTENT
 fi
-  
+
 attachments=$(echo "$attachments" | envsubst)
 
 [[ -n "${channel_file}" && -f "${channel_file}" ]] && channels="${channels} $(cat "${channel_file}")"
@@ -73,6 +76,16 @@ body=""
 if [[ "$allow_insecure" == "true" ]]
 then
     CURL_OPTION="${CURL_OPTION} -k"
+fi
+
+if [[ "$proxy" != "null" ]]
+then
+    CURL_OPTION="${CURL_OPTION} --proxy ${proxy}"
+fi
+
+if [[ "$proxy_https_tunnel" == "true" ]]
+then
+    CURL_OPTION="${CURL_OPTION} --proxytunnel"
 fi
 
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
