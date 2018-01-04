@@ -23,7 +23,9 @@ Source Configuration
 To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to https://my.slack.com/services/new/incoming-webhook/.
 
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
--   `insecure`: *Optional.* Connect to Concourse insecurely - i.e. skip SSL validation. Defaults to false if not provided.
+-   `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip SSL validation. Defaults to false if not provided.
+- `proxy`: *Optional.* Connect to Slack using an HTTP(S) proxy. In the form: `http://my.proxy:3128`
+- `proxy_https_tunnel`: *Optional.* Set to `true` to use an HTTP proxy as an HTTPS tunnel.
 -   `ca_certs`: *Optional.* An array of objects with the following format:
 
   ```yaml
