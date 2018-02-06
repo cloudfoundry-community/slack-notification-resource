@@ -93,26 +93,7 @@ then
   if [[ "${attachments}" == "null" ]]
   then
     TEXT_FILE_CONTENT="${TEXT_FILE_CONTENT:-_(no notification provided)_}"
-  else
-    # we have attachments; better interpolate the `text' field...
-    workfile=$(mktemp /tmp/attach.XXXXXX)
-    outfile=$(mktemp /tmp/attach.XXXXXX)
-    cat >$workfile <<<$attachments
-    for x in $(seq 1 $(jq -r 'length' < $workfile)); do
-      x=$(( x - 1 ))
-      if [[ $x != 0 ]]; then
-        echo -n "," >> $outfile
-      fi
-      attachment_text="$(jq -r ".[$x].text // "'""' < $workfile)"
-      interpolated='{}'
-      if [[ -n "$attachment_text" ]]; then
-        interpolated="$(echo $(echo -n "$attachment_text"| envsubst | jq -R '{"text":.}'))"
-      fi
-      jq -s '.[0] * .[1]' <(jq -r ".[$x]" <$workfile) <(echo "$interpolated") >> $outfile
-    done
-    attachments=$((echo '['; cat $outfile; echo ']') | jq -r .)
   fi
-
 
   text_interpolated=$(echo -n "$text" |envsubst)
 
