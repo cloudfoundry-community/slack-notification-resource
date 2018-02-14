@@ -90,7 +90,7 @@ For more ways, see the [Slack documentation on username/user ID mapping](https:/
 You can read more on how to mention users/channels in the [Slack documentation on linking to channels and users](https://api.slack.com/docs/message-formatting#linking_to_channels_and_users).
 
 
-Note that the old `<@username>` format willl soon no longer be supported by Slack
+Note that the old `<@username>` format will soon no longer be supported by Slack
 (See [changelog](https://api.slack.com/changelog/2017-09-the-one-about-usernames)).
 
 If you omit the `attachments` parameter, the contents of the file specified in the
