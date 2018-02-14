@@ -82,7 +82,10 @@ If you use `text` without using the `$TEXT_FILE_CONTENT` in it, the content
 will not be added to your message.
 
 The text and text_file content can contain multiple lines, emojis like :simple_smile:,
-and links in form `<http://example.com>` or `<http://example.com|Click here!>`.
+and links in form `<http://example.com>` or `<http://example.com|Click here!>`. 
+To mention a user, you will have to use the `<@U123ABC>` format. Note that the old `<@username>`
+format is no longer supported by Slack (See [changelog](https://api.slack.com/changelog/2017-09-the-one-about-usernames)).
+You can read more on how to mention users/channels in the [Slack documentation on message formatting](https://api.slack.com/docs/message-formatting#linking_to_channels_and_users).
 
 If you omit the `attachments` parameter, the contents of the file specified in the
 `attachments_file` parameter will be used verbatim.  If the `attachments` parameter
