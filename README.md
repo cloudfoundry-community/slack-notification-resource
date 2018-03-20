@@ -122,6 +122,7 @@ Optional:
 -	`icon_url`: *Optional.* Override icon by providing URL to the image.
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
 - `silent`: *Optional.* Do not print curl output (avoids leaking slack webhook URL)
+- `link_names`: *Optional.* true or false (defaults to false). Will let you ping group by having @<group-name> in text if set to true.
 - `always_notify`: *Optional.* Attempt to notify even if there are errors or missing text. (Expects true or false, defaults to false)
 
 Explore formatting with Slack's [Message Builder](https://api.slack.com/docs/formatting/builder).
