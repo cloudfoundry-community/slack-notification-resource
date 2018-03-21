@@ -23,7 +23,6 @@ text="$(jq -r '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
 username="$(jq '(.params.username // null)' < "${payload}")"
 icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
-link_names="$(jq -r '(.params.link_names // false)' < "${payload}")"
 
 channels="$(jq -r '(.params.channel // null)' < "${payload}")"
 channel_file="$(jq -r '(.params.channel_file // null)' < "${payload}")"
@@ -116,7 +115,6 @@ then
 {
   "text": ${text_interpolated},
   "username": ${username},
-  "link_names": ${link_names}
   "icon_url": ${icon_url},
   "icon_emoji": ${icon_emoji},
   "channel": ${channel},
