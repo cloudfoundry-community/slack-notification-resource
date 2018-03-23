@@ -112,7 +112,7 @@ the following will be sent under these conditions:
   - `text_file` omitted, or present but file missing
     * `$TEXT_FILE_CONTENT` is replaced with "*(no notification given)*"
   - `text_file` specified and present but file empty:
-    * `$TEXT_FILE_CONTENT` is replaced with empty string.
+    * no notification is sent
 
 Optional:
 
