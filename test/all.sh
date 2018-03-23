@@ -48,8 +48,6 @@ missing_text="_(no notification provided)_"
 
 username="concourse"
 
-test combined_text_template_and_file
-
 test combined_text_template_and_file | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
   .body.channel == null and
