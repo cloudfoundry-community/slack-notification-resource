@@ -14,6 +14,15 @@ payload=$(mktemp /tmp/resource-in.XXXXXX)
 
 cat > "${payload}" <&0
 
+timestamp="$(jq -n "{version:{timestamp:\"$(date +%s)\"}}")"
+
+disable="$(jq -r '.source.disable' < "${payload}")"
+if [[ "$disable" == "true" ]]
+then
+    echo "$timestamp" >&3
+    exit 0
+fi
+
 webhook_url="$(jq -r '.source.url' < "${payload}")"
 allow_insecure="$(jq -r '.source.insecure // "false"' < "${payload}")"
 raw_ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
@@ -187,5 +196,4 @@ EOF
 
 fi
 
-timestamp="$(jq -n "{version:{timestamp:\"$(date +%s)\"}}")"
 echo "$timestamp $metadata $debug_info " | jq -s add  >&3

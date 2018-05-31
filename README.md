@@ -26,6 +26,7 @@ To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to ht
 -   `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip SSL validation. Defaults to false if not provided.
 - `proxy`: *Optional.* Connect to Slack using an HTTP(S) proxy. In the form: `http://my.proxy:3128`
 - `proxy_https_tunnel`: *Optional.* Set to `true` to use an HTTP proxy as an HTTPS tunnel.
+- `disable`: *Optional.* Set to `true` to skip all messaging. Convenient for temporarily disabling notifications without editing your pipelines.
 -   `ca_certs`: *Optional.* An array of objects with the following format:
 
   ```yaml
