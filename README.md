@@ -118,7 +118,8 @@ the following will be sent under these conditions:
 Optional:
 
 -	`channel`: *Optional.* Override channel to send message to. `#channel` and `@user` forms are allowed. You can notify multiple channels separated by whitespace, like `#channel @user`.
--   `channel_file`: *Optional.* File that contains a list of channels to send message to. If `channel` is also specified, the two lists will be concatenated.
+- `channel_file`: *Optional.* File that contains a list of channels to send message to. If `channel` is also specified, the two lists will be concatenated.
+- `env_file`: *Optional.* File that contains a list of `key=value` environment variable that will be avaliable in you slack messages template
 -	`username`: *Optional.* Override name of the sender of the message.
 -	`icon_url`: *Optional.* Override icon by providing URL to the image.
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
