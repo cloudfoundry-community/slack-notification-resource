@@ -53,7 +53,7 @@ proxy_https_tunnel="$(jq -r '.source.proxy_https_tunnel // "false"' < "${payload
 env_file="$(jq -r '.params.env_file // ""' < "${payload}")"
 if [ -f "$env_file" ]; then
   #set -o allexport; source "$env_file"; set +o allexport
-  source <(sed -E -n 's/(\w+)=([^\n]+)/export \1="\2"/ p' "$env_file")
+  source <(sed -E -n '/^.* .*$/s/(\w+)=([^\n]+)/export \1="\2"/ p' "$env_file")
 fi
 
 cert_count="$(echo $raw_ca_certs | jq -r '. | length')"
