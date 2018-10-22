@@ -49,10 +49,11 @@ redact_hook="$(jq -r '.params.redact_hook_url // "true"' < "${payload}")"
 proxy="$(jq -r '.source.proxy // "null"' < "${payload}")"
 proxy_https_tunnel="$(jq -r '.source.proxy_https_tunnel // "false"' < "${payload}")"
 
-# Reab the env_file and export it in the current console
+# Read the env_file and export it in the current console
 env_file="$(jq -r '.params.env_file // ""' < "${payload}")"
 if [ -f "$env_file" ]; then
-  set -o allexport; source "$env_file"; set +o allexport
+  #set -o allexport; source "$env_file"; set +o allexport
+  source <(sed -E -n 's/[^#]+/export &/ p' "$env_file")
 fi
 
 cert_count="$(echo $raw_ca_certs | jq -r '. | length')"

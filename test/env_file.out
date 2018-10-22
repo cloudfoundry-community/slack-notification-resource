@@ -8,7 +8,7 @@
     "attachments": [
       {
         "color": "danger",
-        "text": "Build `$BUILD_NAME` failed! ($VERSION)"
+        "text": "Build `$BUILD_NAME` failed! ($VERSION) - Quality Rating: $QUALITY_GATE"
       }
     ]
   },
