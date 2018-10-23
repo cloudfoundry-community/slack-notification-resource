@@ -52,8 +52,14 @@ proxy_https_tunnel="$(jq -r '.source.proxy_https_tunnel // "false"' < "${payload
 # Read the env_file and export it in the current console
 env_file="$(jq -r '.params.env_file // ""' < "${payload}")"
 if [ -f "$env_file" ]; then
-  #set -o allexport; source "$env_file"; set +o allexport
-  source <(sed -E -n '/^.* .*$/s/(\w+)=([^\n]+)/export \1="\2"/ p' "$env_file")
+  # export key=value, when value as space but no quotes
+  space_line='^.* .*$'
+  search_key_val='(\w+)=([^\n]+)'
+  not_quoted_line="^(?!^.+((?<![\\])[\'\"]).+((?<![\\])[\'\"])).*$"
+  # (?=^(?!.+((?<![\\])['"]).+((?<![\\])['"])).*$)(?=^.* .*$)(\w+)=([^\n]+)
+  
+  source <(sed -E -n -r "/$space_line/ s/$search_key_val/export \1=\"\2\"/ p" "$env_file")
+  source <(sed -E -n -r "/$space_line/! s/$search_key_val/export \1=\2/ p" "$env_file")
 fi
 
 cert_count="$(echo $raw_ca_certs | jq -r '. | length')"
