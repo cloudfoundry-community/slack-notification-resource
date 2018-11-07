@@ -200,6 +200,7 @@ test env_file | jq -e "
   .body.text == \"Inline static text\n\" and
   .body.attachments[0].color == \"danger\" and
   .body.attachments[0].text == \"Build \`my-build\` failed! (1.0.1) - Quality Rating: B (ERROR)\" and
-  ( .body.attachments | length == 1 )"
+  .body.attachments[1].text == \"<something> - ./path/to/*.jar\" and
+  ( .body.attachments | length == 2 )"
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m' 

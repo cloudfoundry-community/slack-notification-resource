@@ -9,6 +9,10 @@
       {
         "color": "danger",
         "text": "Build `$BUILD_NAME` failed! ($VERSION) - Quality Rating: $QUALITY_GATE"
+      },
+      {
+        "color": "danger",
+        "text": "$WITH_PIPE - $with_GLOB"
       }
     ]
   },
