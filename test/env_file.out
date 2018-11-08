@@ -1,0 +1,22 @@
+{
+  "params": {
+    "text": "Inline static text",
+    "username": "concourse",
+    "always_notify": "true",
+    "debug": "true",
+    "env_file": ".env",
+    "attachments": [
+      {
+        "color": "danger",
+        "text": "Build `$BUILD_NAME` failed! ($VERSION) - Quality Rating: $QUALITY_GATE"
+      },
+      {
+        "color": "danger",
+        "text": "$WITH_PIPE - $with_GLOB"
+      }
+    ]
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}
