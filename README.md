@@ -152,7 +152,7 @@ jobs:
         Result: $TEXT_FILE_CONTENT
 ```
 
-See the [official documentation](http://concourse.ci/implementing-resources.html#resource-metadata) for a complete list of available metadata.
+See the [official documentation](https://concourse-ci.org/implementing-resources.html#resource-metadata) for a complete list of available metadata.
 
 Examples
 --------
