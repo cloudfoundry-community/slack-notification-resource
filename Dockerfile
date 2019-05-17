@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM alpine:3.9
 
 RUN apk add --no-cache curl bash jq gettext-dev
 
