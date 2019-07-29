@@ -157,13 +157,13 @@ EOF
   elif [[ "$silent" == "true" ]]
   then
     echo "Using silent output"
-    curl -s -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}"
+    curl -s -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}"
   elif [[ ${redact_hook} == "true" ]]
   then
     url_path="$(echo ${webhook_url} | sed -e "s/https\{0,1\}:\/\/[^\/]*\(\/[^?&#]*\).*/\1/")"
-    curl -v -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   else
-    curl -v -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   fi
 else
   text_interplated="$(echo "" | jq -R -s .)"
