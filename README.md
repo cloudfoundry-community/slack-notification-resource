@@ -23,11 +23,11 @@ Source Configuration
 To setup an [Incoming Webhook](https://api.slack.com/incoming-webhooks) go to https://my.slack.com/services/new/incoming-webhook/.
 
 -	`url`: *Required.* The webhook URL as provided by Slack. Usually in the form: `https://hooks.slack.com/services/XXXX`
--   `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip SSL validation. Defaults to false if not provided.
+- `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip SSL validation. Defaults to false if not provided.
 - `proxy`: *Optional.* Connect to Slack using an HTTP(S) proxy. In the form: `http://my.proxy:3128`
 - `proxy_https_tunnel`: *Optional.* Set to `true` to use an HTTP proxy as an HTTPS tunnel.
 - `disable`: *Optional.* Set to `true` to skip all messaging. Convenient for temporarily disabling notifications without editing your pipelines.
--   `ca_certs`: *Optional.* An array of objects with the following format:
+- `ca_certs`: *Optional.* An array of objects with the following format:
 
   ```yaml
   ca_certs:
@@ -56,9 +56,9 @@ resources:
 Behavior
 --------
 
-### `out`: Sends message to Slack.
+### `out`: Sends a message to Slack.
 
-Send message to Slack, with the configured parameters.
+Send a message to Slack, with the configured parameters.
 
 #### Parameters
 
@@ -82,12 +82,12 @@ Metadata section below)
 If you use `text` without using the `$TEXT_FILE_CONTENT` in it, the content
 will not be added to your message.
 
-The text and text_file content can contain multiple lines, emojis like :simple_smile:,
-and links in form `<http://example.com>` or `<http://example.com|Click here!>`. 
-To mention a user, you will have to use the `<@U123ABC>` format, where `U123ABC` 
-is the user ID. You can get a user's user ID by browsing their profile 
-and using the **⌵** control to display and quickly copy and paste a specific user's ID. 
-For more ways, see the [Slack documentation on username/user ID mapping](https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping). 
+The `text` and `text_file` content can contain multiple lines, emojis like :simple_smile:,
+and links in form `<http://example.com>` or `<http://example.com|Click here!>`.
+To mention a user, you will have to use the `<@U123ABC>` format, where `U123ABC`
+is the user ID. You can get a user's user ID by browsing their profile
+and using the **⌵** control to display and quickly copy and paste a specific user's ID.
+For more ways, see the [Slack documentation on username/user ID mapping](https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping).
 You can read more on how to mention users/channels in the [Slack documentation on linking to channels and users](https://api.slack.com/docs/message-formatting#linking_to_channels_and_users).
 
 
@@ -119,7 +119,7 @@ Optional:
 
 -	`channel`: *Optional.* Override channel to send message to. `#channel` and `@user` forms are allowed. You can notify multiple channels separated by whitespace, like `#channel @user`.
 - `channel_file`: *Optional.* File that contains a list of channels to send message to. If `channel` is also specified, the two lists will be concatenated.
-- `env_file`: *Optional.* File that contains a list of `key=value` environment variable that will be avaliable in your slack messages template
+- `env_file`: *Optional.* File that contains a list of `key=value` environment variables that will be available in your slack messages template
 -	`username`: *Optional.* Override name of the sender of the message.
 -	`icon_url`: *Optional.* Override icon by providing URL to the image.
 -	`icon_emoji`: *Optional.* Override icon by providing emoji code (e.g. `:ghost:`).
