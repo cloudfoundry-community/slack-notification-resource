@@ -142,7 +142,13 @@ then
 EOF
   )"
 
-  compact_body="$(echo "${body}" | jq -c '.')"
+  # needed for mattermost compatibility as they don't accept link_names
+  if [[ "$link_names" == "true" ]]
+  then
+    compact_body="$(echo "${body}" | jq -c '.')"
+  else
+    compact_body="$(echo "${body}" | jq -c 'with_entries(select(.key != "link_names"))')"
+  fi
   echo "$compact_body" > /tmp/compact_body.json
 
   if [[ "$debug" == "true" ]]
