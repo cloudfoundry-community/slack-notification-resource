@@ -20,7 +20,7 @@ test() {
     cmd="/opt/resource/out"
   fi
 
-  cat <<EOM >&2
+  cat <<EOF >&2
 ------------------------------------------------------------------------------
 TESTING: $1
 
@@ -28,11 +28,13 @@ Input:
 $(cat ${base_dir}/${1}.out)
 
 Output:
-EOM
+EOF
 
   result="$(cd $base_dir && cat ${1}.out | $cmd . 2>&1 | tee /dev/stderr)"
-  echo >&2 ""
-  echo >&2 "Result:"
+  cat <<EOF >&2
+
+Result:
+EOF
   echo "$result" # to be passed into jq -e
 }
 
@@ -50,77 +52,71 @@ username="concourse"
 
 test combined_text_template_and_file | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${sample_text}\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 
 test combined_text_template_and_file_empty | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${missing_text}\n\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 
 test combined_text_template_and_file_missing | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${base_text}\n${missing_text}\n\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"Inline static \`text\`\n\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${sample_text}\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file_empty | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == null and
   .body.icon_url == null and
   .body.icon_emoji == null and
   .body.link_names == false and
   .body.username == $(echo $username | jq -R .) and
   .body.text == \"${missing_text}\n\" and
   .body.attachments == null and
-  ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
-  ( .body | keys | length ==  7 )"
+  ( .body | keys | contains([\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
+  ( .body | keys | length ==  6 )"
 
 test text_file_empty_suppress | jq -e "
   ( . | keys | length == 1 ) and
@@ -128,25 +124,25 @@ test text_file_empty_suppress | jq -e "
   ( .version | keys == [\"timestamp\"] )"
 
 test metadata | jq -e "
-  ( .version | keys == [\"timestamp\"] )        and
-  ( .metadata[0].name == \"url\" )              and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
-  ( .metadata[1].name == \"channel\" )          and ( .metadata[1].value == \"#some_channel\" ) and
-  ( .metadata[2].name == \"username\" )         and ( .metadata[2].value == \"concourse\" ) and
-  ( .metadata[3].name == \"text\" )             and ( .metadata[3].value == \"Inline static text\n\" ) and
-  ( .metadata[4].name == \"text_file\" )        and ( .metadata[4].value == \"\" ) and
-  ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and
-  ( .metadata | length == 7 )"
+  ( .version | keys == [\"timestamp\"] )         and
+  ( .metadata[0].name == \"url\" )               and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
+  ( .metadata[1].name == \"username\" )          and ( .metadata[1].value == \"concourse\" ) and
+  ( .metadata[2].name == \"text\" )              and ( .metadata[2].value == \"Inline static text\n\" ) and
+  ( .metadata[3].name == \"text_file\" )         and ( .metadata[3].value == \"\" ) and
+  ( .metadata[4].name == \"text_file_exists\" )  and ( .metadata[4].value == \"No\" )  and
+  ( .metadata[5].name == \"text_file_content\" ) and ( .metadata[5].value == \"_(no notification provided)_\\n\" )  and
+  ( .metadata | length == 6 )"
 
 test metadata_with_payload | jq -e "
-  ( .version | keys == [\"timestamp\"] )        and
-  ( .metadata[0].name == \"url\" )              and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
-  ( .metadata[1].name == \"channel\" )          and ( .metadata[1].value == \"#some_channel\" ) and
-  ( .metadata[2].name == \"username\" )         and ( .metadata[2].value == \"concourse\" ) and
-  ( .metadata[3].name == \"text\" )             and ( .metadata[3].value == \"Inline static text\n\" ) and
-  ( .metadata[4].name == \"text_file\" )        and ( .metadata[4].value == \"\" ) and
-  ( .metadata[5].name == \"text_file_exists\" ) and ( .metadata[5].value == \"No\" )  and
-  ( .metadata[7].name == \"payload\" )          and ( .metadata[7].value | fromjson.source.url == \"***REDACTED***\" ) and
-  ( .metadata | length == 8 )"
+  ( .version | keys == [\"timestamp\"] )         and
+  ( .metadata[0].name == \"url\" )               and ( .metadata[0].value == \"https://hooks.slack.com/services/TH…IS/DO…ES/WO…RK\" ) and
+  ( .metadata[1].name == \"username\" )          and ( .metadata[1].value == \"concourse\" ) and
+  ( .metadata[2].name == \"text\" )              and ( .metadata[2].value == \"Inline static text\n\" ) and
+  ( .metadata[3].name == \"text_file\" )         and ( .metadata[3].value == \"\" ) and
+  ( .metadata[4].name == \"text_file_exists\" )  and ( .metadata[4].value == \"No\" )  and
+  ( .metadata[5].name == \"text_file_content\" ) and ( .metadata[5].value == \"_(no notification provided)_\\n\" )  and
+  ( .metadata[6].name == \"payload\" )           and ( .metadata[6].value | fromjson.source.url == \"***REDACTED***\" ) and
+  ( .metadata | length == 7 )"
 
 test attachments_no_text | jq -e "
   .body.text == null and
@@ -183,18 +179,6 @@ test no_attachments_with_text_and_attachments_file | jq -e "
   .body.attachments[0].color == \"success\" and
   .body.attachments[0].text == \"Build my-build passed!\" and
   ( .body.attachments | length == 1 )"
-
-test multiple_channels | jq -e "
-  .webhook_url == $(echo $webhook_url | jq -R .) and
-  .body.channel == \"#another_channel\" and
-  .body.icon_url == null and
-  .body.icon_emoji == null and
-  .body.link_names == false and
-  .body.username == $(echo $username | jq -R .) and
-  .body.text == \"Inline static text\n\" and
-  ( .body | keys | contains([\"attachments\", \"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\"]) ) and
-  ( .body | keys | length ==  7 ) and
-  .body.attachments == null"
 
 test env_file | jq -e "
   .body.text == \"Inline static text\n\" and

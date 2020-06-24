@@ -25,4 +25,3 @@ meta:
 
   slack:
     webhook: (( vault "secret/pipelines/slack-notification-resource/slack:webhook" ))
-    channel: '#botspam'
