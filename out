@@ -34,8 +34,6 @@ icon_url="$(jq '(.params.icon_url // null)' < "${payload}")"
 icon_emoji="$(jq '(.params.icon_emoji // null)' < "${payload}")"
 link_names="$(jq -r '(.params.link_names // false)' < "${payload}")"
 
-channels="$(jq -r '(.params.channel // null)' < "${payload}")"
-channel_file="$(jq -r '(.params.channel_file // null)' < "${payload}")"
 attachments_file="$(jq -r '.params.attachments_file // ""' < "${payload}")"
 attachments=$(jq -r '(.params.attachments // null)' < $payload)
 
@@ -82,11 +80,6 @@ fi
 
 attachments=$(echo "$attachments" | envsubst)
 
-[[ -n "${channel_file}" && -f "${channel_file}" ]] && channels="${channels} $(cat "${channel_file}")"
-
-for channel in ${channels}
-do
-
 debug_info=""
 metadata=""
 body=""
@@ -127,7 +120,6 @@ then
   [[ "${username}"   != "null" ]] && username="$(eval "printf ${username}" | jq -R -s .)"
   [[ "${icon_url}"   != "null" ]] && icon_url="$(eval "printf ${icon_url}" | jq -R -s .)"
   [[ "${icon_emoji}" != "null" ]] && icon_emoji="$(eval "printf ${icon_emoji}" | jq -R -s .)"
-  [[ "${channel}"    != "null" ]] && channel=\"${channel}\" && channel="$(eval "printf ${channel}" | jq -R -s .)"
 
   body="$(cat <<EOF
 {
@@ -136,7 +128,6 @@ then
   "link_names": ${link_names},
   "icon_url": ${icon_url},
   "icon_emoji": ${icon_emoji},
-  "channel": ${channel},
   "attachments": ${attachments}
 }
 EOF
@@ -175,7 +166,6 @@ else
   text_interplated="$(echo "" | jq -R -s .)"
 fi
 
-done
 
 if [[ "$show_metadata" == "true" ]]
 then
@@ -194,7 +184,6 @@ then
 {
   "metadata": [
     {"name": "url",               "value": ${redacted_webhook_url}},
-    {"name": "channel",           "value": "${channels}"          },
     {"name": "username",          "value": ${username}            },
     {"name": "text",              "value": ${text_interpolated}   },
     {"name": "text_file",         "value": $( echo "$text_file"         | jq -R . ) },
