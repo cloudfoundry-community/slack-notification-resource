@@ -102,11 +102,14 @@ the content will not be added to your message.
 
 The `text` and `text_file` content can contain multiple lines,
 emojis like `:simple_smile:`, and links in form
-`<http://example.com>` or `<http://example.com|Click here!>`.  To
-mention a user, you will have to use the `<@U123ABC>` format,
+`<http://example.com>` or `<http://example.com|Click here!>`.
+
+To mention a user, you will have to use the `<@U123ABC>` format,
 where `U123ABC` is the user ID. You can get a user's user ID by
 browsing their profile and using the **⌵** control to display and
-quickly copy and paste a specific user's ID.  For more ways, see
+quickly copy and paste a specific user's ID. You can @mention a
+group using ` <!subteam^S0123456789>` You can find the user_groups
+id through the url on the slack website. For more ways, see
 the [Slack documentation on username/user ID mapping][uidmap].
 You can read more on how to mention users/channels in the [Slack
 documentation on linking to channels and users][chans].
