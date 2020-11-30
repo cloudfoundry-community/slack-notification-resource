@@ -55,7 +55,7 @@ if [ -f "$env_file" ]; then
   # export key=value, when value as space but no quotes
   search_key_val='(\w+)=([^\n]+)'
   
-  source <(sed -E -n -r "s/$search_key_val/export \1=\"\2\"/ p" "$env_file")
+  source <(sed -En -e 's/(["\`$])/\\\1/g' -e "s/$search_key_val/export \1=\"\2\"/ p" "$env_file")
 fi
 
 cert_count="$(echo $raw_ca_certs | jq -r '. | length')"
