@@ -199,7 +199,7 @@ Optional:
 
 Explore formatting with Slack's [Message Builder][build].
 
-[attach]: https://api.slack.com/docs/message-attachment
+[attach]: https://api.slack.com/reference/messaging/attachments
 [uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
 [chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
 [cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
