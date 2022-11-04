@@ -1,6 +1,6 @@
 {
 	"metadata": {
-		"version": 1
+		"version": 2
 	},
 	"application": {
 		"name": "concourse-slack-resource",
@@ -14,6 +14,18 @@
 			{
 				"name": "Build",
 				"segment_type": "build",
+				"publish_attributes": {
+					"publish": true,
+					"docker_images": [
+						{
+							"repository": "((application.name))",
+							"tags": [
+								"((application.version))"
+							],
+							"context": "."
+						}
+					]
+				},
 				"exit_actions": {},
 				"properties": [
 					{
@@ -54,13 +66,7 @@
 		"exit_actions": {},
 		"default_properties": [],
 		"deployment_files": [],
-		"application_init": {},
-		"releases": [
-			{
-				"name": "consul",
-				"version": "latest"
-			}
-		]
+		"application_init": {}
 	},
 	"organization": {
 		"orgname": "GR-Product"
