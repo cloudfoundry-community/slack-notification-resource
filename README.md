@@ -287,7 +287,7 @@ body: {
 
 To build local versions of this, for testing:
 
-    $ docker build -t slack-notification-resources
+    $ docker build -t slack-notification-resources .
 
 Tests will run as part of the build, and be left in the image for
 future testing.  This adds about 100k to the image.
@@ -302,7 +302,7 @@ To cut a new officialy release of the
 
 
 [hub]:    https://hub.docker.com/r/cfcommunity/slack-notification-resource
-[attach]: https://api.slack.com/docs/message-attachment
+[attach]: https://api.slack.com/reference/messaging/attachments
 [uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
 [chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
 [cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
