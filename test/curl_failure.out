@@ -1,0 +1,9 @@
+{
+  "params": {
+    "always_notify": "true",
+    "debug": "false"
+  },
+  "source": {
+    "url": "https://force-failure.url"
+  }
+}

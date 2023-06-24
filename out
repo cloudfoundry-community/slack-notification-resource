@@ -4,8 +4,8 @@ set -e
 
 cd "${1}"
 
-exec 3>&1
-exec 1>&2
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
 set +x
 # for jq
 PATH=/usr/local/bin:$PATH
@@ -25,7 +25,7 @@ fi
 
 webhook_url="$(jq -r '.source.url' < "${payload}")"
 allow_insecure="$(jq -r '.source.insecure // "false"' < "${payload}")"
-raw_ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
+raw_ca_certs=$(jq -r '.source.ca_certs // []' < "${payload}")
 
 text_file="$(jq -r '.params.text_file // ""' < "${payload}")"
 text="$(jq -r '(.params.text // "${TEXT_FILE_CONTENT}")' < "${payload}")"
@@ -37,7 +37,7 @@ link_names="$(jq -r '(.params.link_names // false)' < "${payload}")"
 channels="$(jq -r '(.params.channel // null)' < "${payload}")"
 channel_file="$(jq -r '(.params.channel_file // null)' < "${payload}")"
 attachments_file="$(jq -r '.params.attachments_file // ""' < "${payload}")"
-attachments=$(jq -r '(.params.attachments // null)' < $payload)
+attachments=$(jq -r '(.params.attachments // null)' < "${payload}")
 
 debug="$(jq -r '.params.debug // "false"' < "${payload}")"
 show_metadata="$(jq -r '.params.metadata // "false"' < "${payload}")"
@@ -90,7 +90,8 @@ do
 debug_info=""
 metadata=""
 body=""
-
+# Start off successful, and set to failure during the run
+CURL_RETURN_CODE=0
 
 if [[ "$allow_insecure" == "true" ]]
 then
@@ -164,15 +165,16 @@ EOF
   then
     echo "Using silent output"
     curl -s -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}"
+    CURL_RETURN_CODE=$?
   elif [[ ${redact_hook} == "true" ]]
   then
     url_path="$(echo ${webhook_url} | sed -e "s/https\{0,1\}:\/\/[^\/]*\(\/[^?&#]*\).*/\1/")"
     curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    CURL_RETURN_CODE=${PIPESTATUS[0]}
   else
     curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    CURL_RETURN_CODE=${PIPESTATUS[0]}
   fi
-else
-  text_interplated="$(echo "" | jq -R -s .)"
 fi
 
 done
@@ -180,7 +182,6 @@ done
 if [[ "$show_metadata" == "true" ]]
 then
   redacted_webhook_url=$(echo "${webhook_url}" | sed -e 's#/\([^/\.]\{2\}\)[^/.]\{5,\}\([^/.]\{2\}\)#/\1…\2#g' | jq -R .)
-  escaped_text_file="$(echo $text_file | jq -R -s . )"
   if [[ ${redact_hook} == "true" ]]
   then
     escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
@@ -188,7 +189,6 @@ then
     escaped_payload="$(cat $payload | jq -rcM ".source.url = \"***REDACTED***\"" | jq -R -s . )"
   fi
 
-  escaped_content="$(echo $TEXT_FILE_CONTENT | jq -R -s . )"
   text_file_exists="No" && [[ -n "$text_file" ]] && [[ -f "$text_file" ]] && text_file_exists=Yes
   metadata="$(cat <<EOF
 {
@@ -208,7 +208,11 @@ EOF
   then
     metadata="$( echo ${metadata} | jq -r ".metadata += [{name: \"payload\", value: $escaped_payload}]")"
   fi
-
 fi
 
 echo "$timestamp $metadata $debug_info " | jq -s add  >&3
+
+if [ "$CURL_RETURN_CODE" -ne 0 ]; then
+  echo "Sending your message to the slack webhook failed, exiting exceptionally."
+  exit 1
+fi

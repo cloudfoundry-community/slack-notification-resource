@@ -1,0 +1,10 @@
+{
+  "params": {
+    "always_notify": "true",
+    "debug": "false",
+    "redact_hook": "false"
+  },
+  "source": {
+    "url": "https://force-failure.url"
+  }
+}
