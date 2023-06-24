@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eo pipefail
 
 on_exit() {
   exitcode=$?
@@ -30,10 +30,16 @@ $(cat "${base_dir}/${1}.out")
 Output:
 EOM
 
-  result="$(cd "${base_dir}" && cat "${1}.out" | "${cmd}" . 2>&1 | tee /dev/stderr)"
+  result=$(cd "${base_dir}" && cat "${1}.out" | "${cmd}" . 2>&1 | tee /dev/stderr)
   echo >&2 ""
   echo >&2 "Result:"
   echo "${result}" # to be passed into jq -e
+}
+
+echo_true() {
+  echo >&2 ""
+  echo >&2 "Result:"
+  echo "true"
 }
 
 export BUILD_PIPELINE_NAME='my-pipeline'
@@ -48,6 +54,32 @@ env_vars_tail="BUILD_NAME=my-build\nVERSION=1.0.1\nQUALITY_GATE=B (ERROR)\nWITH_
 missing_text="_(no notification provided)_"
 
 username="concourse"
+# Turn off failure on failed command return because we can't exit the script when we EXPECT a failure from a test
+set +e
+
+# Run these in a subshell so that the subshell process exits itself. If we don't run in a subshell the exit will exit THIS process
+$(test curl_failure)
+if [ $? -eq 0 ]; then # Since we EXPECT failure from these tests, assert that they come back with a "bad" non-zero status code.
+  exit 1
+else
+  echo_true
+fi
+
+$(test curl_failure_with_silent)
+if [ $? -eq 0 ]; then
+  exit 1
+else
+  echo_true
+fi
+
+$(test curl_failure_without_redact_hook)
+if [ $? -eq 0 ]; then
+  exit 1
+else
+  echo_true
+fi
+
+set -e
 
 test combined_text_template_and_file | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
