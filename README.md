@@ -321,7 +321,7 @@ body: {
 
 To build local versions of this, for testing:
 
-    $ docker build -t slack-notification-resources
+    $ docker build -t slack-notification-resources .
 
 Tests will run as part of the build, and be left in the image for
 future testing.  This adds about 100k to the image.
