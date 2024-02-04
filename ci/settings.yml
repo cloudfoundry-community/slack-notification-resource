@@ -1,0 +1,41 @@
+---
+meta:
+  name:    slack-notification-resource
+  target:  gk
+  url:     https://ci.gstack.io
+
+  initial_version: 1.0.0
+
+  git:
+    email:  ((git-commit-email))
+    name:   ((git-commit-name))
+
+  image:
+    registry:
+      username: ((docker-registry-username))
+      password: ((docker-registry-password))
+
+  dockerhub:
+    username: ((dockerhub-username))
+    email:    ((dockerhub-email))
+    password: ((dockerhub-password))
+    repository: (( concat meta.github.owner "/" meta.name ))
+
+  aws:
+    bucket:      (( grab meta.pipeline ))
+    region_name: us-east-1
+    access_key:  ((aws-access-key))
+    secret_key:  ((aws-secret-key))
+
+  github:
+    owner:  
+    repo:   slack-notification-resource
+    branch: master
+    private_key:  ((github-private-key))
+    access_token: ((github-access-token))
+
+  slack:
+    webhook:       ((slack-webhook))
+    username:      ((slack-username))
+    icon:          ((slack-icon-url))
+    channel:       "#slack-notification-resource"
