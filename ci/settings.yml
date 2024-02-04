@@ -1,36 +1,45 @@
 ---
 meta:
   name:    slack-notification-resource
-  target:  gk
+  release: Slack notification Concourse resource
+  target:  gk-plat-devs
   url:     https://ci.gstack.io
 
-  initial_version: 1.0.0
+  initial_version: "1.7.0"
 
   git:
     email:  ((git-commit-email))
     name:   ((git-commit-name))
 
   image:
+    name: (( concat meta.private-registry.host "/gstack/gk-ops" ))
     registry:
-      username: ((docker-registry-username))
-      password: ((docker-registry-password))
+      username: (( grab meta.private-registry.username ))
+      password: (( grab meta.private-registry.password ))
 
   dockerhub:
-    username: ((dockerhub-username))
-    email:    ((dockerhub-email))
-    password: ((dockerhub-password))
-    repository: (( concat meta.github.owner "/" meta.name ))
+    username:   ((dockerhub-username))
+    password:   ((dockerhub-password))
+    org:        cfcommunity
+    repository: (( concat meta.dockerhub.org "/" meta.name ))
+    short_desc:
+      Concourse CI resource for sending notifications to Slack
+
+  private-registry:
+    host:       harbor.ci.gstack.io
+    username:   ((private-registry-username))
+    password:   ((private-registry-password))
+    repository: (( concat meta.private-registry.host "/" meta.dockerhub.org "/" meta.name ))
 
   aws:
     bucket:      (( grab meta.pipeline ))
-    region_name: us-east-1
+    region_name: eu-west-3
     access_key:  ((aws-access-key))
     secret_key:  ((aws-secret-key))
 
   github:
-    owner:  
+    owner:  cloudfoundry-community
     repo:   slack-notification-resource
-    branch: master
     private_key:  ((github-private-key))
     access_token: ((github-access-token))
 
@@ -38,4 +47,159 @@ meta:
     webhook:       ((slack-webhook))
     username:      ((slack-username))
     icon:          ((slack-icon-url))
-    channel:       "#slack-notification-resource"
+    channel:       "#oss-pipelines-notifications"
+
+groups:
+  - name: (( grab meta.name ))
+    jobs:
+      - (( append ))
+      - test
+
+jobs:
+  - name: build
+    plan:
+      - (( inline ))
+      - in_parallel:
+          - (( append ))
+          - { get: alpine-latest, trigger: true, params: { format: oci } }
+
+      - # task: build-docker-image
+        config:
+          inputs:
+            - (( append ))
+            - name: alpine-latest
+        params:
+          IMAGE_ARG_alpine: alpine-latest/image.tar
+
+  - name: build-pr
+    plan:
+      - (( inline ))
+      - in_parallel:
+          - (( append ))
+          - { get: alpine-latest, trigger: true, params: { format: oci } }
+
+      - {} # put: git-pull-requests
+
+      - # task: build-docker-image
+        config:
+          inputs:
+            - (( append ))
+            - name: alpine-latest
+        params:
+          IMAGE_ARG_alpine: alpine-latest/image.tar
+
+  - name: test
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - { get: edge, passed: [ build ], trigger: true }
+          - { get: git,  passed: [ build ], trigger: true }
+      - task: test-image
+        image: edge
+        config:
+          platform: linux
+          inputs:
+            - name: git
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                set -ueo pipefail -x
+
+                bash --version | head -n 1
+
+                git/test/all.sh
+
+        on_failure:
+          put: notify
+          params:
+            channel:  (( grab meta.slack.channel ))
+            username: (( grab meta.slack.username ))
+            icon_url: (( grab meta.slack.icon ))
+            text:     (( grab meta.slack.fail_text ))
+
+  - name: rc
+    plan:
+      - (( inline ))
+      - in_parallel:
+          - (( merge on get ))
+          - { get: edge, passed: [ (( replace )), test ] }
+          - { get: git,  passed: [ (( replace )), test ] }
+
+  - name: promote
+    plan:
+      - (( insert after 1 )) # insert after “task: release”
+      - task: append-usage
+        image: image
+        config:
+          platform: linux
+          inputs:  [ name: gh, name: version ]
+          outputs: [ name: gh ]
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                set -ueo pipefail
+                cat >> gh/notes.md <<EOF
+
+                ### Usage
+
+                \`\`\`yaml
+                resource_types:
+                  - name: notify-slack
+                    type: registry-image
+                    source:
+                      repository: ${DOCKERHUB_REPOSITORY}
+                      tag: "$(< version/number)"
+                \`\`\`
+                EOF
+        params:
+          DOCKERHUB_REPOSITORY: (( concat meta.dockerhub.org "/" meta.name ))
+
+resources:
+
+  - name: git
+    check_every: 24h
+    webhook_token: ((concourse-webhook-token))
+
+  - name: git-pull-requests
+    check_every: 24h
+    webhook_token: ((concourse-webhook-token))
+
+  - name: edge
+    source:
+      username:   (( grab meta.private-registry.username ))
+      password:   (( grab meta.private-registry.password ))
+      repository: (( grab meta.private-registry.repository ))
+
+  - name: latest
+    source:
+      username:   (( grab meta.private-registry.username ))
+      password:   (( grab meta.private-registry.password ))
+      repository: (( grab meta.private-registry.repository ))
+
+  - name: version
+    icon: github
+    source:
+      bucket:            (( prune ))
+      region_name:       (( prune ))
+      key:               (( prune ))
+      access_key_id:     (( prune ))
+      secret_access_key: (( prune ))
+      driver:      git
+      uri:         git@github.com:gstackio/gk-pipelines-compass.git
+      branch:      master
+      file:        (( concat "versions/" meta.pipeline ))
+      private_key: ((github-private-key))
+      git_user:    "((git-commit-name)) <((git-commit-email))>"
+
+  - name: alpine-latest
+    type: registry-image
+    icon: docker
+    check_every: 24h
+    source:
+      repository:        alpine
+      semver_constraint: "< 1970" # Avoid YYYYMMDD tags like '20231219'
