@@ -1,0 +1,11 @@
+{
+  "params": {
+    "text_file": "sample-with-vars.txt",
+    "env_file": ".env",
+    "username": "concourse",
+    "debug": "true"
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}
