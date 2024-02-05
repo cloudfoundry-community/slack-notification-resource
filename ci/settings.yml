@@ -163,11 +163,11 @@ resources:
 
   - name: git
     check_every: 24h
-    webhook_token: ((concourse-webhook-token))
+    webhook_token: ((gk-concourse-webhook-token))
 
   - name: git-pull-requests
     check_every: 24h
-    webhook_token: ((concourse-webhook-token))
+    webhook_token: ((gk-concourse-webhook-token))
 
   - name: edge
     source:
