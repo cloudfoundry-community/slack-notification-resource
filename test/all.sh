@@ -61,6 +61,9 @@ test combined_text_template_and_file | jq -e "
   ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
   ( .body | keys | length ==  7 )"
 
+test combined_text_template_and_file_with_vars | jq -e "
+  .body.text == \"${base_text}\n${sample_text}\n${env_vars_tail}\"
+  "
 
 test combined_text_template_and_file_empty | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
@@ -110,6 +113,10 @@ test text_file | jq -e "
   .body.attachments == null and
   ( .body | keys | contains([\"channel\",\"icon_emoji\",\"icon_url\",\"username\",\"link_names\",\"text\",\"attachments\"]) ) and
   ( .body | keys | length ==  7 )"
+
+test text_file_with_env_vars | jq -e "
+  .body.text == \"${sample_text}\n${env_vars_tail}\"
+  "
 
 test text_file_empty | jq -e "
   .webhook_url == $(echo $webhook_url | jq -R .) and
@@ -203,9 +210,5 @@ test env_file | jq -e "
   .body.attachments[0].text == \"Build \`my-build\` failed! (1.0.1) - Quality Rating: B (ERROR)\" and
   .body.attachments[1].text == \"<something> - ./path/to/*.jar\" and
   ( .body.attachments | length == 2 )"
-
-test text_file_with_env_vars | jq -e "
-  .body.text == \"${sample_text}\n${env_vars_tail}\"
-  "
 
 echo -e '\e[32;1m'"All tests passed!"'\e[0m'
