@@ -25,10 +25,8 @@ RUN chmod +x /opt/resource/out /opt/resource/in /opt/resource/check
 
 
 FROM resource AS tests
-
 ADD test/ /opt/resource-tests/
-RUN /opt/resource-tests/all.sh \
-    && rm -rf /tmp/*
+RUN /opt/resource-tests/all.sh
 
 
 
