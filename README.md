@@ -8,12 +8,15 @@ Resource Type Configuration
 
 ```yaml
 resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag:        latest
 ```
+
+The `tag: latest` source property is optional, as the value `latest` in the
+default.
 
 Source Configuration
 --------------------
@@ -25,7 +28,7 @@ To setup an Incoming Webhook, go to
   in the form: `https://hooks.slack.com/services/XXXX`.
 
 - `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip
-  SSL validation. Defaults to false if not provided.
+  SSL validation. Defaults to `false` if not provided.
 
 - `proxy`: *Optional.* Connect to Slack using an HTTP(S) proxy. In
   the form: `http://my.proxy:3128`.
@@ -42,33 +45,46 @@ To setup an Incoming Webhook, go to
 
   ```yaml
   ca_certs:
-  - domain: example.com
-    cert: |
-      -----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----
-  - domain: 10.244.6.2
-    cert: |
-      -----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----
+    - domain: example.com
+      cert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+    - domain: 10.244.6.2
+      cert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
   ```
 
   Each entry specifies the x509 CA certificate for the trusted
   domain.
 
+Example:
+
 ```yaml
 resources:
-- name: slack-alert
-  type: slack-notification
-  source:
-    url: https://hooks.slack.com/services/XXXX
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: https://hooks.slack.com/services/XXXX
 ```
 
 Behavior
 --------
 
-### `out`: Sends a message to Slack.
+### `check` Step (`check` script): No operation
+
+Checking for new version always returns the last timestamp-based dummy
+version, created when the last `put` step was executed on this resource.
+
+### `get` Step (`in` script): No operation
+
+Getting a new version of this resource does nothing else that always returning
+the last timestamp-based dummy version, created when the last `put` step was
+executed on this resource.
+
+### `put` Step (`out` script): Sends a message to Slack.
 
 Send a message to Slack, with the configured parameters.
 
