@@ -72,7 +72,7 @@ fi
 
 export TEXT_FILE_CONTENT=""
 [[ -n "${text_file}" && ! -f "${text_file}" ]] && text_file=""
-[[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(cat "${text_file}")"
+[[ -n "${text_file}" && -f "${text_file}" ]] && TEXT_FILE_CONTENT="$(envsubst < "${text_file}")"
 
 ATTACHMENTS_FILE_CONTENT=""
 [[ -n "${attachments_file}" && -f "${attachments_file}" ]] && ATTACHMENTS_FILE_CONTENT="$(cat "${attachments_file}")"
