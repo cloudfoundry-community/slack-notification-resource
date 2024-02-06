@@ -38,10 +38,11 @@ meta:
     secret_key:  ((aws-secret-key))
 
   github:
-    owner:  cloudfoundry-community
-    repo:   slack-notification-resource
-    private_key:  ((github-private-key))
-    access_token: ((github-access-token))
+    owner:          cloudfoundry-community
+    repo:           slack-notification-resource
+    pr_base_branch: develop
+    private_key:    ((github-private-key))
+    access_token:   ((github-access-token))
 
   slack:
     webhook:       ((slack-webhook))
