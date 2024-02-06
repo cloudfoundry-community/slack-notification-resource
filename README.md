@@ -1,3 +1,10 @@
+[![Docker Stars](https://img.shields.io/docker/stars/cfcommunity/slack-notification-resource.svg?style=plastic)](https://registry.hub.docker.com/v2/repositories/cfcommunity/slack-notification-resource/stars/count/)
+[![Docker pulls](https://img.shields.io/docker/pulls/cfcommunity/slack-notification-resource.svg?style=plastic)](https://registry.hub.docker.com/v2/repositories/cfcommunity/slack-notification-resource)
+<!--
+[![Concourse Build](https://ci.gstack.io/api/v1/teams/gk-plat-devs/pipelines/slack-notification-resource/jobs/build/badge)](https://ci.gstack.io/teams/gk-plat-devs/pipelines/slack-notification-resource)
+-->
+[![dockeri.co](https://dockeri.co/image/cfcommunity/slack-notification-resource)](https://hub.docker.com/r/cfcommunity/slack-notification-resource/)
+
 Slack notification sending resource
 ===================================
 
@@ -192,6 +199,12 @@ Optional:
 
 Explore formatting with Slack's [Message Builder][build].
 
+[attach]: https://api.slack.com/docs/message-attachment
+[uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
+[chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
+[cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
+[build]:  https://api.slack.com/docs/formatting/builder
+
 
 #### Metadata
 
@@ -223,6 +236,8 @@ jobs:
 
 See the [official documentation][meta] for a complete list of
 available metadata.
+
+[meta]:   https://concourse-ci.org/implementing-resource-types.html#resource-metadata
 
 Examples
 --------
@@ -296,8 +311,11 @@ body: {
   "icon_emoji": null,
   "channel": null
 }
-
 ```
+
+
+
+<!-- START_OF_DOCKERHUB_STRIP -->
 
 ## Release Engineering
 
@@ -314,13 +332,22 @@ To cut a new officialy release of the
 
     $ make VERSION=x.y.z release
 
-
-
-
 [hub]:    https://hub.docker.com/r/cfcommunity/slack-notification-resource
-[attach]: https://api.slack.com/docs/message-attachment
-[uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
-[chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
-[cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
-[build]:  https://api.slack.com/docs/formatting/builder
-[meta]:   https://concourse-ci.org/implementing-resource-types.html#resource-metadata
+
+<!-- END_OF_DOCKERHUB_STRIP -->
+
+
+
+## Author and license
+
+Copyright © 2017-2020,    James Hunt
+Copyright © 2021-present, Benjamin Gandon, Gstack
+
+The Slack notification resource is released under the terms of the
+[MIT license](./LICENSE).
+
+<!--
+# Local Variables:
+# indent-tabs-mode: nil
+# End:
+-->
