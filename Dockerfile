@@ -3,7 +3,7 @@ FROM alpine:3
 ARG VERSION
 ARG BUILD_DATE
 ARG VCS_REF
-LABEL maintainer="Stark & Wayne <beahero@starkandwayne.com>" \
+LABEL maintainer="Gstack <https://github.com/gstackio>" \
       summary="Concourse Slack Notifications Resource" \
       version=$VERSION \
       org.label-schema.build-date=$BUILD_DATE \
