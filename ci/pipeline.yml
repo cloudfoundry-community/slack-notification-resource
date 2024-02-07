@@ -42,6 +42,7 @@ meta:
     repo:           (( param "Please specify the name of the Github repository" ))
     branch:         master
     pr_base_branch: (( grab meta.github.branch ))
+    release_branch: (( grab meta.github.branch ))
     private_key:    (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
     access_token:   (( param "Please generate a Personal Access Token and specify it here" ))
 
@@ -59,8 +60,8 @@ meta:
     fail_moji:    ":airplane_arriving:"
     upset_moji:   ":sadpanda:"
     pipeline_url:  (( concat meta.url "/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}" ))
-    fail_link:     (( concat "<" meta.slack.pipeline_url "/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}| Concourse Failure! " meta.slack.upset_moji ">" ))
-    fail_text:    '(( concat meta.slack.fail_link " " meta.pipeline ": `${BUILD_JOB_NAME}` job failed" ))'
+    fail_link:     (( concat "<" meta.slack.pipeline_url "/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}| Let's go fix it!>" ))
+    fail_text:    '(( concat meta.pipeline ": `${BUILD_JOB_NAME}` job has failed " meta.slack.upset_moji " " meta.slack.fail_link " :hammer_and_wrench:" ))'
 
 groups:
   - name: (( grab meta.name ))
@@ -101,6 +102,7 @@ jobs:
 
     on_failure:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
@@ -169,6 +171,7 @@ jobs:
 
     on_success:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
@@ -212,6 +215,7 @@ jobs:
         params: { file: version/number }
     on_failure:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
@@ -226,6 +230,7 @@ jobs:
       - { put: version,                 params: { file: version/number } }
     on_failure:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
@@ -240,6 +245,7 @@ jobs:
       - { put: version,                 params: { file: version/number } }
     on_failure:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
@@ -271,13 +277,14 @@ jobs:
             path: ./git/ci/scripts/release
             args: []
           params:
-            REPO_ROOT:    git
-            RELEASE_ROOT: gh
-            RELEASE_NAME: (( grab meta.release ))
-            REPO_OUT:     pushme/git
-            VERSION_FROM: version/number
-            GIT_EMAIL:    (( grab meta.git.email ))
-            GIT_NAME:     (( grab meta.git.name ))
+            REPO_ROOT:      git
+            RELEASE_ROOT:   gh
+            RELEASE_NAME:   (( grab meta.release ))
+            REPO_OUT:       pushme/git
+            VERSION_FROM:   version/number
+            GIT_EMAIL:      (( grab meta.git.email ))
+            GIT_NAME:       (( grab meta.git.name ))
+            RELEASE_BRANCH: (( grab meta.github.release_branch ))
 
       - load_var: version
         file: version/number
@@ -315,6 +322,7 @@ jobs:
           body: gh/notes.md
     on_failure:
       put: notify
+      no_get: true
       params:
         channel:  (( grab meta.slack.channel ))
         username: (( grab meta.slack.username ))
