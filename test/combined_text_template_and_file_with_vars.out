@@ -1,0 +1,12 @@
+{
+  "params": {
+    "text_file": "sample-with-vars.txt",
+    "text": ":some_emoji:<https://my-ci.my-org.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Alert!>\n$TEXT_FILE_CONTENT\n",
+    "env_file": ".env",
+    "username": "concourse",
+    "debug": "true"
+  },
+  "source": {
+    "url": "https://some.url"
+  }
+}

@@ -1,3 +1,10 @@
+[![Docker Stars](https://img.shields.io/docker/stars/cfcommunity/slack-notification-resource.svg?style=plastic)](https://registry.hub.docker.com/v2/repositories/cfcommunity/slack-notification-resource/stars/count/)
+[![Docker pulls](https://img.shields.io/docker/pulls/cfcommunity/slack-notification-resource.svg?style=plastic)](https://registry.hub.docker.com/v2/repositories/cfcommunity/slack-notification-resource)
+<!--
+[![Concourse Build](https://ci.gstack.io/api/v1/teams/gk-plat-devs/pipelines/slack-notification-resource/jobs/build/badge)](https://ci.gstack.io/teams/gk-plat-devs/pipelines/slack-notification-resource)
+-->
+[![dockeri.co](https://dockeri.co/image/cfcommunity/slack-notification-resource)](https://hub.docker.com/r/cfcommunity/slack-notification-resource/)
+
 Slack notification sending resource
 ===================================
 
@@ -8,12 +15,15 @@ Resource Type Configuration
 
 ```yaml
 resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag:        latest
 ```
+
+The `tag: latest` source property is optional, as the value `latest` in the
+default.
 
 Source Configuration
 --------------------
@@ -25,7 +35,7 @@ To setup an Incoming Webhook, go to
   in the form: `https://hooks.slack.com/services/XXXX`.
 
 - `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip
-  SSL validation. Defaults to false if not provided.
+  SSL validation. Defaults to `false` if not provided.
 
 - `proxy`: *Optional.* Connect to Slack using an HTTP(S) proxy. In
   the form: `http://my.proxy:3128`.
@@ -42,33 +52,46 @@ To setup an Incoming Webhook, go to
 
   ```yaml
   ca_certs:
-  - domain: example.com
-    cert: |
-      -----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----
-  - domain: 10.244.6.2
-    cert: |
-      -----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----
+    - domain: example.com
+      cert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+    - domain: 10.244.6.2
+      cert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
   ```
 
   Each entry specifies the x509 CA certificate for the trusted
   domain.
 
+Example:
+
 ```yaml
 resources:
-- name: slack-alert
-  type: slack-notification
-  source:
-    url: https://hooks.slack.com/services/XXXX
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: https://hooks.slack.com/services/XXXX
 ```
 
 Behavior
 --------
 
-### `out`: Sends a message to Slack.
+### `check` Step (`check` script): No operation
+
+Checking for new version always returns the last timestamp-based dummy
+version, created when the last `put` step was executed on this resource.
+
+### `get` Step (`in` script): No operation
+
+Getting a new version of this resource does nothing else that always returning
+the last timestamp-based dummy version, created when the last `put` step was
+executed on this resource.
+
+### `put` Step (`out` script): Sends a message to Slack.
 
 Send a message to Slack, with the configured parameters.
 
@@ -176,6 +199,12 @@ Optional:
 
 Explore formatting with Slack's [Message Builder][build].
 
+[attach]: https://api.slack.com/reference/messaging/attachments
+[uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
+[chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
+[cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
+[build]:  https://api.slack.com/docs/formatting/builder
+
 
 #### Metadata
 
@@ -207,6 +236,8 @@ jobs:
 
 See the [official documentation][meta] for a complete list of
 available metadata.
+
+[meta]:   https://concourse-ci.org/implementing-resource-types.html#resource-metadata
 
 Examples
 --------
@@ -280,8 +311,11 @@ body: {
   "icon_emoji": null,
   "channel": null
 }
-
 ```
+
+
+
+<!-- START_OF_DOCKERHUB_STRIP -->
 
 ## Release Engineering
 
@@ -298,13 +332,22 @@ To cut a new officialy release of the
 
     $ make VERSION=x.y.z release
 
-
-
-
 [hub]:    https://hub.docker.com/r/cfcommunity/slack-notification-resource
-[attach]: https://api.slack.com/reference/messaging/attachments
-[uidmap]: https://api.slack.com/changelog/2017-09-the-one-about-usernames#mapping
-[chans]:  https://api.slack.com/docs/message-formatting#linking_to_channels_and_users
-[cl2017]: https://api.slack.com/changelog/2017-09-the-one-about-usernames
-[build]:  https://api.slack.com/docs/formatting/builder
-[meta]:   https://concourse-ci.org/implementing-resource-types.html#resource-metadata
+
+<!-- END_OF_DOCKERHUB_STRIP -->
+
+
+
+## Author and license
+
+Copyright © 2017-2020,    James Hunt
+Copyright © 2021-present, Benjamin Gandon, Gstack
+
+The Slack notification resource is released under the terms of the
+[MIT license](./LICENSE).
+
+<!--
+# Local Variables:
+# indent-tabs-mode: nil
+# End:
+-->
