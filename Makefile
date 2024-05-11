@@ -3,6 +3,7 @@ VERSION ?= dev
 
 build:
 	docker build \
+	  --build-arg alpine="alpine:3" \
 	  --build-arg BUILD_DATE="$(shell date -u --iso-8601)" \
 	  --build-arg VCS_REF="$(shell git rev-parse --short HEAD)" \
 	  --build-arg VERSION="$(VERSION)" \

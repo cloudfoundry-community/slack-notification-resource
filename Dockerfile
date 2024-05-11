@@ -1,4 +1,6 @@
-FROM alpine:3
+ARG alpine
+
+FROM ${alpine} AS resource
 
 ARG VERSION
 ARG BUILD_DATE
@@ -21,4 +23,4 @@ RUN chmod +x /opt/resource/out /opt/resource/in /opt/resource/check
 
 ADD test/ /opt/resource-tests/
 RUN /opt/resource-tests/all.sh \
- && rm -rf /tmp/*
+    && rm -rf /tmp/*
