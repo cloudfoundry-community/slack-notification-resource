@@ -25,15 +25,15 @@ test() {
 TESTING: $1
 
 Input:
-$(cat ${base_dir}/${1}.out)
+$(cat "${base_dir}/${1}.out")
 
 Output:
 EOM
 
-  result="$(cd $base_dir && cat ${1}.out | $cmd . 2>&1 | tee /dev/stderr)"
+  result="$(cd "${base_dir}" && cat "${1}.out" | "${cmd}" . 2>&1 | tee /dev/stderr)"
   echo >&2 ""
   echo >&2 "Result:"
-  echo "$result" # to be passed into jq -e
+  echo "${result}" # to be passed into jq -e
 }
 
 export BUILD_PIPELINE_NAME='my-pipeline'

@@ -1,20 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
-set -e
+set -ueo pipefail
 
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
-PAYLOAD=$(mktemp /tmp/resource-check.XXXXXX)
+payload=$(cat <&0)
 
-cat > "$PAYLOAD" <&0
+timestamp=$(jq --raw-output '.version.timestamp // empty' <<< "${payload}")
 
-TS=$(jq '.version.timestamp // empty' < "$PAYLOAD")
-
-if [ -z "$TS" ]; then
+if [[ -z "${timestamp}" ]]; then
   echo '[]' >&3
 else
-  jq -n "[
-    { timestamp: $TS }
-  ]" >&3
+    jq --null-input \
+        --arg "timestamp" "${timestamp}" \
+        '[ { timestamp: $timestamp } ]' \
+        >&3
 fi
