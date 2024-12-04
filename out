@@ -63,9 +63,11 @@ cert_count=$(jq 'length' <<< "${raw_ca_certs}")
 if [[ "${cert_count}" -gt 0 ]]; then
     cert_dir="/usr/local/share/ca-certificates/"
     mkdir -p "${cert_dir}"
-    for idx in $(seq 0 "$((cert_count - 1))"); do
-        domain=$(jq --raw-output ".[$idx].domain" <<< "${raw_ca_certs}")
-        jq --raw-output --arg idx "${idx}" ".[$idx].cert" <<< "${raw_ca_certs}" \
+    for idx in $( seq 0 $((cert_count - 1)) ); do
+        domain=$(
+            jq --raw-output --arg idx "${idx}" '.[$idx].domain' <<< "${raw_ca_certs}"
+        )
+        jq --raw-output --arg idx "${idx}" '.[$idx].cert' <<< "${raw_ca_certs}" \
             >> "${cert_dir}/ca-cert-${domain}.crt"
   done
   update-ca-certificates

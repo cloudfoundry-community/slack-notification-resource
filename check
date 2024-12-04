@@ -10,7 +10,7 @@ payload=$(cat <&0)
 timestamp=$(jq --raw-output '.version.timestamp // empty' <<< "${payload}")
 
 if [[ -z "${timestamp}" ]]; then
-  echo '[]' >&3
+    echo '[]' >&3
 else
     jq --null-input \
         --arg "timestamp" "${timestamp}" \
