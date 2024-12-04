@@ -93,13 +93,13 @@ if [[ -n "${channel_file}" && -f "${channel_file}" ]]; then
     channels="${channels} $(< "${channel_file}")"
 fi
 
+curl_errors=0
+
 for channel in ${channels}; do
 
     debug_info=""
     metadata=""
     body=""
-
-    CURL_RETURN_CODE=0 # Start off successful, and set to failure during the run
 
     declare -a CURL_OPTIONS
     if [[ "${allow_insecure}" == "true" ]]; then
@@ -177,7 +177,7 @@ EOF
             curl --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
                 --request "POST" --url "${webhook_url}" \
                 --data-raw "${compact_body}"
-            CURL_RETURN_CODE=$?
+            curl_errors=$(( ${curl_errors} + $? ))
         elif [[ "${redact_hook}" == "true" ]]; then
             url_path=$(
                 sed -Ee 's,https?://[^/]*(/[^?&#]*).*,\1,' <<< "${webhook_url}"
@@ -186,13 +186,13 @@ EOF
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" 2>&1 \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
-            CURL_RETURN_CODE=${PIPESTATUS[0]}
+            curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         else
             curl --verbose --fail --show-error --location "${CURL_OPTIONS[@]}" \
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
-            CURL_RETURN_CODE=${PIPESTATUS[0]}
+            curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         fi
     fi
 done
@@ -236,7 +236,7 @@ jq --slurp 'add' \
     <<< "${timestamp} ${metadata} ${debug_info}" \
     >&3
 
-if [ "${CURL_RETURN_CODE}" -ne 0 ]; then
+if [[ "${curl_errors}" -ne 0 ]]; then
   echo "Sending your message to the slack webhook failed, exiting exceptionally."
   exit 1
 fi
