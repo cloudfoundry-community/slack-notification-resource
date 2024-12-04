@@ -1,4 +1,4 @@
-name: Trigger Concourse git resource
+name: Trigger Concourse 'git' resource
 on: [ push, workflow_dispatch ]
 jobs:
   trigger-resource-check:
