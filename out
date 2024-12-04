@@ -173,7 +173,7 @@ EOF
                     }'
             )
         elif [[ "${silent}" == "true" ]]; then
-            echo "Using silent output"
+            echo "INFO: using silent output"
             curl --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
                 --request "POST" --url "${webhook_url}" \
                 --data-raw "${compact_body}"
@@ -182,13 +182,13 @@ EOF
             url_path=$(
                 sed -Ee 's,https?://[^/]*(/[^?&#]*).*,\1,' <<< "${webhook_url}"
             )
-            curl --verbose --fail --show-error --location "${CURL_OPTIONS[@]}" \
+            curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" 2>&1 \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
             curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         else
-            curl --verbose --fail --show-error --location "${CURL_OPTIONS[@]}" \
+            curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
@@ -237,6 +237,6 @@ jq --slurp 'add' \
     >&3
 
 if [[ "${curl_errors}" -ne 0 ]]; then
-  echo "Sending your message to the slack webhook failed, exiting exceptionally."
+  echo "ERROR: sending the message to the Slack webhook has failed"
   exit 1
 fi
