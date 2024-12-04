@@ -54,25 +54,36 @@ env_vars_tail="BUILD_NAME=my-build\nVERSION=1.0.1\nQUALITY_GATE=B (ERROR)\nWITH_
 missing_text="_(no notification provided)_"
 
 username="concourse"
-# Turn off failure on failed command return because we can't exit the script when we EXPECT a failure from a test
+
+# Turn off failure on failed command return because we can't exit the script
+# when we EXPECT a failure from a test
 set +e
 
-# Run these in a subshell so that the subshell process exits itself. If we don't run in a subshell the exit will exit THIS process
-$(test curl_failure)
-if [ $? -eq 0 ]; then # Since we EXPECT failure from these tests, assert that they come back with a "bad" non-zero status code.
-  exit 1
-else
-  echo_true
-fi
-
-$(test curl_failure_with_silent)
+(
+  # Run these in a subshell so that the subshell process exits itself. If we
+  # don't run in a subshell the exit will exit THIS process
+  test curl_failure
+)
+# Since we EXPECT failure from these tests, assert that they come back with a
+# "bad" non-zero status code
 if [ $? -eq 0 ]; then
   exit 1
 else
   echo_true
 fi
 
-$(test curl_failure_without_redact_hook)
+(
+  test curl_failure_with_silent
+)
+if [ $? -eq 0 ]; then
+  exit 1
+else
+  echo_true
+fi
+
+(
+  test curl_failure_without_redact_hook
+)
 if [ $? -eq 0 ]; then
   exit 1
 else
