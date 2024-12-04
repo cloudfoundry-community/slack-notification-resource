@@ -338,9 +338,9 @@ To cut a new officialy release of the
 
 
 
-## Author and license
+## Authors and license
 
-Copyright © 2017-2020,    James Hunt
+Copyright © 2017-2020,    James Hunt<br/>
 Copyright © 2021-present, Benjamin Gandon, Gstack
 
 The Slack notification resource is released under the terms of the
