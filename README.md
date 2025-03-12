@@ -31,6 +31,9 @@ Source Configuration
 To setup an Incoming Webhook, go to
 <https://my.slack.com/services/new/incoming-webhook/>.
 
+To get oauth_token, create a slack bot user, got to
+<https://api.slack.com/apps>.
+
 - `url`: *Required.* The webhook URL as provided by Slack. Usually
   in the form: `https://hooks.slack.com/services/XXXX`.
 
@@ -70,7 +73,7 @@ To setup an Incoming Webhook, go to
   Each entry specifies the x509 CA certificate for the trusted
   domain.
 
-Example:
+Example with webhook:
 
 ```yaml
 resources:
@@ -78,6 +81,16 @@ resources:
     type: slack-notification
     source:
       url: https://hooks.slack.com/services/XXXX
+```
+
+Example with oauth_token:
+
+```yaml
+resources:
+  - name: slack-alert
+    type: slack-notification
+    source:
+      token: xoxb-********-*******
 ```
 
 Behavior
