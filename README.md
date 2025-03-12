@@ -34,6 +34,9 @@ To setup an Incoming Webhook, go to
 - `url`: *Required.* The webhook URL as provided by Slack. Usually
   in the form: `https://hooks.slack.com/services/XXXX`.
 
+- `token`: *Optional.* The slack token to use for the API calls. Usually
+  in the form: `xoxb-XXXX`. ** Required parameter if `url` not specified **
+
 - `insecure`: *Optional.* Connect to Slack insecurely - i.e. skip
   SSL validation. Defaults to `false` if not provided.
 
