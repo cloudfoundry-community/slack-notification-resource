@@ -13,6 +13,7 @@ LABEL maintainer="Gstack <https://github.com/gstackio>" \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.schema-version="1.0.0"
 
+# Notice: the 'gettext-dev' package provides the required 'envsubst' binary
 RUN apk add --no-cache curl bash jq gettext-dev
 
 COPY check /opt/resource/check
@@ -21,6 +22,12 @@ COPY out   /opt/resource/out
 
 RUN chmod +x /opt/resource/out /opt/resource/in /opt/resource/check
 
+
+
+FROM resource AS tests
 ADD test/ /opt/resource-tests/
-RUN /opt/resource-tests/all.sh \
-    && rm -rf /tmp/*
+RUN /opt/resource-tests/all.sh
+
+
+
+FROM resource
