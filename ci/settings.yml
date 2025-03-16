@@ -157,6 +157,11 @@ jobs:
 
 resources:
 
+  - name: image
+    source:
+      tag:               (( prune ))
+      semver_constraint: "< 1970" # Avoid YYYYMMDD tags like '20231219'
+
   - name: develop
     type: git
     icon: github
