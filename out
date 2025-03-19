@@ -24,7 +24,8 @@ if [[ ${disable} == "true" ]]; then
     exit 0
 fi
 
-webhook_url=$(   jq --raw-output '.source.url'                 <<< "${payload}")
+webhook_url="$(  jq --raw-output '.source.url // "https://slack.com/api/chat.postMessage"' <<< "${payload}")"
+oauth_token="$(  jq --raw-output '.source.token' <<< "${payload}")"
 allow_insecure=$(jq --raw-output '.source.insecure // "false"' <<< "${payload}")
 raw_ca_certs=$(  jq              '.source.ca_certs // []'      <<< "${payload}")
 
@@ -176,24 +177,44 @@ EOF
             )
         elif [[ "${silent}" == "true" ]]; then
             echo "INFO: using silent output"
-            curl --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
-                --request "POST" --url "${webhook_url}" \
-                --data-raw "${compact_body}"
+            if [[ -n ${oauth_token} ]]; then
+                curl --silent -X POST --header 'Content-type: application/json' \
+                     --header "Authorization: Bearer ${oauth_token}" \
+                     --data-raw "${compact_body}" ${CURL_OPTIONS[@]} "${webhook_url}"
+            else
+                curl --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
+                    --request "POST" --url "${webhook_url}" \
+                    --data-raw "${compact_body}"
+            fi
             curl_errors=$(( ${curl_errors} + $? ))
         elif [[ "${redact_hook}" == "true" ]]; then
             url_path=$(
                 sed -Ee 's,https?://[^/]*(/[^?&#]*).*,\1,' <<< "${webhook_url}"
             )
-            curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
-                    --request "POST" --url "${webhook_url}" \
-                    --data-raw "${compact_body}" 2>&1 \
-                | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+            if [[ -n ${oauth_token} ]]; then
+                curl -v -X POST --header 'Content-type: application/json' \
+                     --header "Authorization: Bearer ${oauth_token}" \
+                     --data-raw "${compact_body}" \
+                     ${CURL_OPTIONS[@]} "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***OAUTH TOKEN REDACTED***#g"
+            else
+                curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
+                        --request "POST" --url "${webhook_url}" \
+                        --data-raw "${compact_body}" 2>&1 \
+                    | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+            fi
             curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         else
-            curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
-                    --request "POST" --url "${webhook_url}" \
-                    --data-raw "${compact_body}" \
-                | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+            if [[ -n ${oauth_token} ]]; then
+                curl -v -X POST --header 'Content-type: application/json' \
+                     --header "Authorization: Bearer ${oauth_token}" \
+                     --data-raw "${compact_body}" \
+                     ${CURL_OPTIONS[@]} "${webhook_url}" | sed -e "s#${url_path}#***OAUTH TOKEN REDACTED***#g"
+            else
+                curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
+                        --request "POST" --url "${webhook_url}" \
+                        --data-raw "${compact_body}" \
+                    | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+            fi
             curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         fi
     fi
