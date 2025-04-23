@@ -185,12 +185,14 @@ EOF
                 sed -Ee 's,https?://[^/]*(/[^?&#]*).*,\1,' <<< "${webhook_url}"
             )
             curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
+                    --header 'Content-type: application/json' \
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" 2>&1 \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
             curl_errors=$(( ${curl_errors} + ${PIPESTATUS[0]} ))
         else
             curl --verbose --silent --fail --show-error --location "${CURL_OPTIONS[@]}" \
+                    --header 'Content-type: application/json' \
                     --request "POST" --url "${webhook_url}" \
                     --data-raw "${compact_body}" \
                 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
